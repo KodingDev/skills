@@ -1,6 +1,7 @@
 {
   "name": "skills",
   "skills": [
-    "./skills/engineering/cdk-best-practices"
+    "./skills/engineering/cdk-best-practices",
+    "./skills/planning/plan-project"
   ]
 }

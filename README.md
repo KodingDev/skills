@@ -30,6 +30,15 @@ Pick the skills you want and which agents to install them on. That's it.
   removal policies, construct anatomy, CDK Nag, and more. Returns a prioritized
   `file:line` report with a concrete fix per finding.
 
+### Project Planning
+
+- **[plan-project](./skills/planning/plan-project/SKILL.md)** — user-invoked
+  (`/plan-project`). Takes a project from "I have ideas" — plus any design docs
+  or ADRs — to a review-ready backlog: it reconciles messy intake, breaks the
+  work into vertical-slice tickets, writes them to a mini-PRD quality bar,
+  sequences them by real dependencies, assigns by capacity, and shapes the
+  result for Jira or Linear. Codebase-aware; produces markdown, never live writes.
+
 ## Adding a skill
 
 Drop a folder under a bucket, write `SKILL.md`, then register it in the README,
