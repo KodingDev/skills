@@ -79,21 +79,21 @@ Every case bespoke — each alert channel has grown its own delivery path, its
 own retry scheme, its own bookkeeping, and one of them is quietly hiding a
 routing policy. The next channel will grow all four again:
 
-```
-function sendSlackAlert(alert) {
-  hook = SLACK_HOOKS[alert.team] or DEFAULT_HOOK
+```ts
+function sendSlackAlert(alert: Alert) {
+  const hook = SLACK_HOOKS[alert.team] ?? DEFAULT_HOOK
   slackQueue.push({ hook, text: toMrkdwn(alert) })
-  slackRetryTimers[alert.id] = scheduleResend(alert, 30s)
+  slackRetryTimers.set(alert.id, setTimeout(() => resendSlack(alert), 30_000))
 }
 
-function sendEmailAlert(alert) {
-  mailer.send(emailRouting.lookup(alert.team), renderHtml(alert), retries: 3)
-  sentEmailLog.append(alert.id)
+function sendEmailAlert(alert: Alert) {
+  mailer.send(emailRouting.lookup(alert.team), renderHtml(alert), { retries: 3 })
+  sentEmailLog.push(alert.id)
 }
 
-function sendPagerAlert(alert) {
-  if (alert.severity == "critical" or alert.team == "payments") {
-    pagerClient.trigger(alert.id, truncate(alert.message, 512))
+function sendPagerAlert(alert: Alert) {
+  if (alert.severity === "critical" || alert.team === "payments") {
+    pagerClient.trigger(alert.id, alert.message.slice(0, 512))
   }
   pagedAlerts.add(alert.id)
 }
@@ -102,16 +102,16 @@ function sendPagerAlert(alert) {
 One shape, cases as data — the machinery exists once, and what made each
 channel "special" survives as a field:
 
-```
-CHANNELS = {
+```ts
+const CHANNELS: Record<Channel, ChannelSpec> = {
   slack: { deliver: postWebhook, format: toMrkdwn,   retries: 3 },
   email: { deliver: sendMail,    format: renderHtml, retries: 3 },
   pager: { deliver: triggerPage, format: toPlain,    retries: 5, minSeverity: "critical" },
 }
 
-function send(alert, channel) {
-  spec = CHANNELS[channel]
-  if (spec.minSeverity and alert.severity < spec.minSeverity) return
+function send(alert: Alert, channel: Channel) {
+  const spec = CHANNELS[channel]
+  if (spec.minSeverity && !atLeast(alert.severity, spec.minSeverity)) return
   withRetry(spec.retries, () => spec.deliver(spec.format(alert)))
 }
 ```
