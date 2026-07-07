@@ -34,9 +34,9 @@ Pick the skills you want and which agents to install them on. That's it.
   the durable version of whatever's being built. Kills the two classic failure
   modes (the converter that wraps the old mess, the speculative over-build) and
   holds the bar: one source of truth, nothing special, schema-first contracts,
-  composable pieces, damn simple, zero comment narration, real types and TSDoc
-  on public surfaces, a DX pass to finish. Golden from the start instead of
-  audit-and-refactor later.
+  composable pieces, damn simple, zero comment narration, precise signatures
+  and doc comments on public surfaces, a DX pass to finish. Golden from the
+  start instead of audit-and-refactor later.
 
 - **[orchestrate](./skills/engineering/orchestrate/SKILL.md)** — judgment for
   multi-agent work: builders and critics never share incentives or context,

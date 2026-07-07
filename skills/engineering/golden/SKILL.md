@@ -35,15 +35,16 @@ differ by a string, four handlers that differ by a field), collapse them into
 one parameterized shape driven by data. Behavior lives in one place; variation
 lives in data.
 
-**Nothing is special.** Every "special" case is a smell: a weapon is a mesh
-attached to a mesh, a visibility toggle is a timeline event. Before adding a
-new kind/type/flag with its own logic, ask what generic thing it actually is —
-the special part is usually data (a socket name, a range, a table entry), not
-a type with its own machinery.
+**Nothing is special.** Every "special" case is a smell: an admin is a user
+with a role, a scheduled report is a report with a timer, an alert channel is
+a transport plus a format. Before adding a new kind/type/flag with its own
+logic, ask what generic thing it actually is — the special part is usually
+data (a name, a threshold, a table entry), not a type with its own machinery.
 
-**Schema-first contracts.** Define the data shape once as a schema or type and
-derive from it — validation, parsing, defaults. Hand-rolled validation helpers
-beside a type definition are the type system's job done twice, worse.
+**Schema-first contracts.** Define each data shape once — schema, type,
+dataclass, proto, whatever the stack offers — and derive from it: validation,
+parsing, defaults. Hand-rolled checking beside a shape definition is the same
+contract written twice, worse.
 
 **Composable pieces.** Small modules with honest seams that click together, so
 the next thing gets built *from* them rather than beside them. If a consumer
@@ -54,10 +55,11 @@ or goes. Run the deletion test on your own design before anyone reviews it:
 what here would a competent reader delete? Over-specific carve-outs that don't
 generalize are debt at birth.
 
-**Public surfaces get real contracts.** Exported APIs get real types — named
-option objects, unions, branded types where they prevent misuse — and real
-TSDoc (or the language's equivalent): what it does, params, the non-obvious
-constraint. This is documentation of a contract, not narration.
+**Public surfaces get real contracts.** Exported APIs get precise signatures —
+named options, enumerated variants, no stringly-typed grab bags — and real doc
+comments (TSDoc, docstring, rustdoc, whatever the language uses): what it
+does, its parameters, the non-obvious constraint. This is documentation of a
+contract, not narration.
 
 **No narration in the code.** Internals get zero comments by default. A
 comment earns its place only by stating a non-obvious *why* — a hidden
@@ -77,21 +79,21 @@ Every case bespoke — each alert channel has grown its own delivery path, its
 own retry scheme, its own bookkeeping, and one of them is quietly hiding a
 routing policy. The next channel will grow all four again:
 
-```ts
-function sendSlackAlert(alert: Alert) {
-  const hook = SLACK_HOOKS[alert.team] ?? DEFAULT_HOOK
+```
+function sendSlackAlert(alert) {
+  hook = SLACK_HOOKS[alert.team] or DEFAULT_HOOK
   slackQueue.push({ hook, text: toMrkdwn(alert) })
-  slackRetryTimers.set(alert.id, setTimeout(() => resendSlack(alert), 30_000))
+  slackRetryTimers[alert.id] = scheduleResend(alert, 30s)
 }
 
-function sendEmailAlert(alert: Alert) {
-  mailer.send(emailRouting.lookup(alert.team), renderHtml(alert), { retries: 3 })
-  sentEmailLog.push(alert.id)
+function sendEmailAlert(alert) {
+  mailer.send(emailRouting.lookup(alert.team), renderHtml(alert), retries: 3)
+  sentEmailLog.append(alert.id)
 }
 
-function sendPagerAlert(alert: Alert) {
-  if (alert.severity === "critical" || alert.team === "payments") {
-    pagerClient.trigger(alert.id, alert.message.slice(0, 512))
+function sendPagerAlert(alert) {
+  if (alert.severity == "critical" or alert.team == "payments") {
+    pagerClient.trigger(alert.id, truncate(alert.message, 512))
   }
   pagedAlerts.add(alert.id)
 }
@@ -100,16 +102,16 @@ function sendPagerAlert(alert: Alert) {
 One shape, cases as data — the machinery exists once, and what made each
 channel "special" survives as a field:
 
-```ts
-const CHANNELS: Record<Channel, ChannelSpec> = {
+```
+CHANNELS = {
   slack: { deliver: postWebhook, format: toMrkdwn,   retries: 3 },
   email: { deliver: sendMail,    format: renderHtml, retries: 3 },
   pager: { deliver: triggerPage, format: toPlain,    retries: 5, minSeverity: "critical" },
 }
 
-function send(alert: Alert, channel: Channel) {
-  const spec = CHANNELS[channel]
-  if (spec.minSeverity && !atLeast(alert.severity, spec.minSeverity)) return
+function send(alert, channel) {
+  spec = CHANNELS[channel]
+  if (spec.minSeverity and alert.severity < spec.minSeverity) return
   withRetry(spec.retries, () => spec.deliver(spec.format(alert)))
 }
 ```
@@ -124,8 +126,8 @@ function send(alert: Alert, channel: Channel) {
 - No consumer of any module reaches inside its boundary to get its job done.
 - The deletion test passes: no file, flag, or abstraction a competent reader
   would remove.
-- Public surfaces have real types and TSDoc; a cold consumer gets from import
-  to working call without reading the source.
+- Public surfaces have precise signatures and doc comments; a cold consumer
+  gets from import to working call without reading the source.
 - No comment in the diff narrates what the code already says; any that remain
   are one-line non-obvious whys.
 - You did the DX pass and fixed what it surfaced — not filed it.
