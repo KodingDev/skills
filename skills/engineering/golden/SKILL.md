@@ -73,43 +73,44 @@ doesn't say what to do — is a defect to fix now, while the context is loaded.
 
 ## Contrast
 
-Every case bespoke — each kind has grown its own attach path, its own
-visibility mechanism, its own bookkeeping, and the next kind will grow
-another:
+Every case bespoke — each alert channel has grown its own delivery path, its
+own retry scheme, its own bookkeeping, and one of them is quietly hiding a
+routing policy. The next channel will grow all four again:
 
 ```ts
-function attachWeapon(node: SceneNode) {
-  boneByName("hand_r").add(node)
-  node.visible = activeStage === node.stage
-  weaponRegistry.set(node.id, node)
+function sendSlackAlert(alert: Alert) {
+  const hook = SLACK_HOOKS[alert.team] ?? DEFAULT_HOOK
+  slackQueue.push({ hook, text: toMrkdwn(alert) })
+  slackRetryTimers.set(alert.id, setTimeout(() => resendSlack(alert), 30_000))
 }
 
-function attachProp(node: SceneNode) {
-  root.add(node)
-  propVisibilityRunner.track(node)
+function sendEmailAlert(alert: Alert) {
+  mailer.send(emailRouting.lookup(alert.team), renderHtml(alert), { retries: 3 })
+  sentEmailLog.push(alert.id)
 }
 
-function attachCameo(node: SceneNode) {
-  root.add(node)
-  cameoRanges.push([node.showAt, node.hideAt])
-  node.visible = false
+function sendPagerAlert(alert: Alert) {
+  if (alert.severity === "critical" || alert.team === "payments") {
+    pagerClient.trigger(alert.id, alert.message.slice(0, 512))
+  }
+  pagedAlerts.add(alert.id)
 }
 ```
 
-One shape, cases as data — the machinery exists once, and what made each kind
-"special" survives as a field:
+One shape, cases as data — the machinery exists once, and what made each
+channel "special" survives as a field:
 
 ```ts
-const KINDS: Record<Kind, KindSpec> = {
-  weapon: { socket: "hand_r", visibility: "stage" },
-  prop:   { socket: "root",   visibility: "always" },
-  cameo:  { socket: "root",   visibility: "range" },
+const CHANNELS: Record<Channel, ChannelSpec> = {
+  slack: { deliver: postWebhook, format: toMrkdwn,   retries: 3 },
+  email: { deliver: sendMail,    format: renderHtml, retries: 3 },
+  pager: { deliver: triggerPage, format: toPlain,    retries: 5, minSeverity: "critical" },
 }
 
-function attach(node: SceneNode) {
-  const spec = KINDS[node.kind]
-  socketByName(spec.socket).add(node)
-  visibility.bind(node, spec.visibility)
+function send(alert: Alert, channel: Channel) {
+  const spec = CHANNELS[channel]
+  if (spec.minSeverity && !atLeast(alert.severity, spec.minSeverity)) return
+  withRetry(spec.retries, () => spec.deliver(spec.format(alert)))
 }
 ```
 
