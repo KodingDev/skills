@@ -2,6 +2,8 @@
   "name": "skills",
   "skills": [
     "./skills/engineering/cdk-best-practices",
+    "./skills/engineering/golden",
+    "./skills/engineering/orchestrate",
     "./skills/planning/plan-project"
   ]
 }

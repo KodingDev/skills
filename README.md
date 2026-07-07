@@ -30,6 +30,20 @@ Pick the skills you want and which agents to install them on. That's it.
   removal policies, construct anatomy, CDK Nag, and more. Returns a prioritized
   `file:line` report with a concrete fix per finding.
 
+- **[golden](./skills/engineering/golden/SKILL.md)** — build-time bias toward
+  the durable version of whatever's being built. Kills the two classic failure
+  modes (the converter that wraps the old mess, the speculative over-build) and
+  holds the bar: one source of truth, nothing special, schema-first contracts,
+  composable pieces, damn simple, zero comment narration, precise signatures
+  and doc comments on public surfaces, a DX pass to finish. Golden from the
+  start instead of audit-and-refactor later.
+
+- **[orchestrate](./skills/engineering/orchestrate/SKILL.md)** — judgment for
+  multi-agent work: builders and critics never share incentives or context,
+  cheap models compile while expensive models judge (and one brain reads the
+  result), facts go in and verdicts come out, and deterministic tools shrink
+  the corpus before any agent reads a byte.
+
 ### Project Planning
 
 - **[plan-project](./skills/planning/plan-project/SKILL.md)** — user-invoked
