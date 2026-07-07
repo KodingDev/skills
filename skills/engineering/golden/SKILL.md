@@ -73,16 +73,31 @@ doesn't say what to do — is a defect to fix now, while the context is loaded.
 
 ## Contrast
 
-Every case special — a new kind means a new code path with its own lifecycle:
+Every case bespoke — each kind has grown its own attach path, its own
+visibility mechanism, its own bookkeeping, and the next kind will grow
+another:
 
 ```ts
-if (node.kind === "weapon") attachWeapon(node)
-else if (node.kind === "prop") attachProp(node)
-else if (node.kind === "cameo") attachCameoWithVisibility(node)
+function attachWeapon(node: SceneNode) {
+  boneByName("hand_r").add(node)
+  node.visible = activeStage === node.stage
+  weaponRegistry.set(node.id, node)
+}
+
+function attachProp(node: SceneNode) {
+  root.add(node)
+  propVisibilityRunner.track(node)
+}
+
+function attachCameo(node: SceneNode) {
+  root.add(node)
+  cameoRanges.push([node.showAt, node.hideAt])
+  node.visible = false
+}
 ```
 
-A case is data — a new kind is one entry, and what made each case "special"
-survives as a field:
+One shape, cases as data — the machinery exists once, and what made each kind
+"special" survives as a field:
 
 ```ts
 const KINDS: Record<Kind, KindSpec> = {
@@ -91,7 +106,11 @@ const KINDS: Record<Kind, KindSpec> = {
   cameo:  { socket: "root",   visibility: "range" },
 }
 
-attach(node, KINDS[node.kind])
+function attach(node: SceneNode) {
+  const spec = KINDS[node.kind]
+  socketByName(spec.socket).add(node)
+  visibility.bind(node, spec.visibility)
+}
 ```
 
 ## Done when
