@@ -46,6 +46,15 @@ Pick the skills you want and which agents to install them on. That's it.
 
 ### Project Planning
 
+- **[design-space](./skills/planning/design-space/SKILL.md)** — user-invoked
+  (`/design-space`). A charrette that runs before a line of code: it grounds in
+  what already exists, lands a one-sentence thesis and three *named*
+  anti-references, names the 3–5 axes the design actually varies on, then
+  generates 4–6 mutually incompatible corners and presents them flat — no
+  ranking, because a ranked list gets the safest card picked. Ends with a
+  one-page written space: live, dead (with reasons), open, and fixed. Holds the
+  point of commitment open on purpose, and hands off to a build skill.
+
 - **[plan-project](./skills/planning/plan-project/SKILL.md)** — user-invoked
   (`/plan-project`). Takes a project from "I have ideas" — plus any design docs
   or ADRs — to a review-ready backlog: it reconciles messy intake, breaks the
