@@ -56,8 +56,7 @@ whichever field the conversation just made available, and keep the rest visible 
    unambiguous. One decision per round, then stop. The tool caps at four options, so a set of five
    or six takes two rounds — never truncate a list to fit, because an option the user never sees
    reads exactly like one that was never generated. Freeform is right only when the answer is a
-   sentence you could not have enumerated — the thesis, a name, "what is this actually for". Run
-   `/grilling` cadence if it helps.
+   sentence you could not have enumerated — the thesis, a name, "what is this actually for".
 3. **Recommend on decisions, never on options.** A decision ("who is this for?") deserves your
    recommended answer, marked as such. A generated **corner** does not: rank them and the user
    picks the safest card, and your ranking is the model's prior, not their taste.
@@ -143,13 +142,13 @@ purpose, with what will settle it). Kill things out loud.
 ## Landing
 
 Write the page where the project keeps planning docs (`plans/`, `docs/`, `.meridian/specs/`); if
-there is no convention, ask once. Then name the skill that takes it: a build skill for a surface,
-`/prototype` when a corner has to be felt before it can be judged, `/plan-project` when the space
-is settled and the work needs breaking down.
+there is no convention, ask once. Then name what takes it: a design or build pass for a surface, a
+throwaway prototype when a corner has to be felt before it can be judged, a planning pass when the
+space is settled and the work needs breaking down.
 
-The page **replaces** a build skill's own discovery round rather than preceding it — hand it to
-`impeccable`'s `shape` or `hallmark`'s design-context gate as answered input, and do not sit
-through those questions twice.
+Whatever runs next, the page **replaces** its discovery round rather than preceding it. Hand it
+over as answered input — audience, job, tone, constraints, and what was already ruled out — so
+nobody sits through those questions a second time.
 
 **Done when:** the page exists on disk, the user has confirmed it, and the next step is named with
 an owner — not "we could now build it". Every corner that was generated appears on it under live,

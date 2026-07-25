@@ -3,9 +3,9 @@
 An **axis** is a named continuum with two ends someone could reasonably argue for. Three to five of
 them bound the space. Fewer and the space is a point; more and nobody can hold it in their head.
 
-There is no library of axes here on purpose. A list of pre-named dimensions becomes the answer, and
-the resulting space is the generic one every category already has. The axes that matter are
-project-specific and arrive in the product's own vocabulary.
+The axes that matter are project-specific and arrive in the product's own vocabulary. Derive first;
+the examples further down are there to react against when a derived list comes out thin, never to
+be picked from as a menu.
 
 ## Naming one
 
@@ -20,6 +20,36 @@ project-specific and arrive in the product's own vocabulary.
   live axis, not a mistake. Name it and hand it back.
 - **Ask what the medium could be.** Print, terminal, instrument panel, board game, ledger, map,
   darkroom. Where the thing sits between two media is often the sharpest axis available.
+
+## Axes that recur
+
+Prompts, not a checklist. Two uses: as a starting shape when a derived axis is still fuzzy, and as
+a check that a named one is really a decision. Rename the ends into the product's language before
+any of them reaches the page — a borrowed end says nothing about this product, and an axis nobody
+recognises as theirs will not survive the first argument about it.
+
+**What it is** — tool <-> environment (picked up for one job, or inhabited) · instrument <->
+appliance (rewards practice, or works identically forever) · document <-> application (read, or
+operated) · single surface <-> system (one screen, or a world with rooms).
+
+**How it behaves** — ceremony <-> immediacy (confirms and steps, or one irreversible-feeling
+action) · guided <-> open (the path is laid, or the user assembles it) · foreground <-> ambient
+(demands attention, or lives at the edge) · progressive <-> flat (depth as competence grows, or
+everything at once).
+
+**How it feels** — formal <-> familiar (where the copy and the chrome sit; drives voice as much as
+type) · authority <-> companionship (it knows and tells you, or works alongside you) · confident
+<-> careful (acts and offers undo, or asks first) · restraint <-> exuberance (how much the surface
+is allowed to perform). Quiet is not the same as restrained: a quiet design can be extremely
+expressive, and a loud one can be disciplined.
+
+**How it is made** — dense <-> airy (the axis most often decided by accident) · structural <->
+decorated (beauty from the arrangement, or applied) · native <-> bespoke (platform conventions, or
+its own vocabulary) · uniform <-> composed (one kit everywhere, or each screen art-directed).
+
+**Who it is for** — novice-first <-> expert-first (the first hour, or the thousandth) · solo <->
+social (whether other people are visible) · consumer <-> practitioner (whether using it is part of
+someone's job).
 
 ## The test
 
