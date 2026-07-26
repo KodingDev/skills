@@ -37,6 +37,23 @@ workflow actually runs. *Check:* CI runs the floor (lint + typecheck + test)
 everywhere; suppressions for inactive rules are themselves lint errors;
 opt-outs are capped and each carries a tracking reference.
 
+**The misaimed gate.** Enforcement that runs but points at a convention
+nobody follows — the branch-name regex arm matching zero live branches, the
+required check exempting the directory where the work happens. It passes
+forever, so it never gets questioned. *Tell:* for each gate, find the last
+time it actually rejected something. *Check:* align the gate to the observed
+convention (or the convention to the gate — pick one); a gate that has never
+fired is either misaimed or unnecessary.
+
+**Process theater.** The tracker is a map agents read, and it can rot like
+any doc: cycles that complete nothing and get emptied retroactively, WIP
+triple the stated limit, statuses frozen in-flight for months, labels the
+operating model describes that don't exist. *Tell:* compare what the process
+docs claim against what the tracker data shows actually ran. *Check:* run the
+ritual honestly or delete it — no silent theater; a strategy pivot the work
+already made gets recorded in one short status update, or escalated as a
+decision the owner must make now.
+
 **Repo-level forking.** `thing.old/` beside `thing/`; a second full checkout
 serving as a long-lived branch, carrying uncommitted work that can neither be
 reviewed nor cleanly lost. *Tell:* sibling directories sharing a name or a

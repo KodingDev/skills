@@ -48,9 +48,15 @@ subsystem is a missing test at that seam, not bad luck. Score each package's
 enforcement against its blast radius: the shared contract consumed by three
 repos needs the *most* CI, not the least.
 
+Name what's healthy with the same rigor as what's sick. Rehab that tramples
+working rituals — clean PR descriptions, a lockstep release habit, a good
+rules file — costs more trust than it recovers, and the healthy tissue is
+where the golden examples come from.
+
 **Done when** you can present: per package, what actually runs on push; the
 baseline metrics; every orienting doc and rules file with a staleness verdict;
-and the three worst offenders named with evidence.
+the three worst offenders named with evidence; and the protect list — what's
+working and must survive the rehab untouched.
 
 ## 2. Fix the map
 
@@ -69,9 +75,16 @@ Committed plans carry a status header or they go; scratch goes to a
 gitignored directory. Repo-level forks (`thing.old/`, a second checkout as a
 long-lived branch) become branches or get deleted.
 
+The tracker is a map too, and agents read it. Apply the same three futures to
+process: a ritual the data shows isn't running (cycles completing nothing,
+milestones long past target, statuses frozen mid-flight) gets run honestly or
+deleted — **no silent theater**. And when effort has diverged from the stated
+strategy, that's a pivot nobody recorded: capture the decision in one short
+status update, or surface it as a decision the owner must make now.
+
 **Done when** every claim in every orienting doc is verified-true, generated,
-or asserted; every committed plan has a status; and no fork of a repo lives
-beside it.
+or asserted; every committed plan has a status; no fork of a repo lives
+beside it; and the tracker's rituals either reflect reality or are gone.
 
 ## 3. Instruction diet
 
