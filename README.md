@@ -44,6 +44,16 @@ Pick the skills you want and which agents to install them on. That's it.
   result), facts go in and verdicts come out, and deterministic tools shrink
   the corpus before any agent reads a byte.
 
+- **[rehab](./skills/engineering/rehab/SKILL.md)** — user-invoked (`/rehab`).
+  Rehabilitates an AI-assisted codebase that's gone sloppy, on one law:
+  enforce, don't instruct. Six stages — triage what actually runs vs what's
+  decoration, fix the map the agent reads (stale docs are why it "won't
+  listen"), put the rules file on a ~300-word diet, convert every prose rule
+  into a check that fails inside the agent's own loop, pay down the worst
+  debt behind characterization tests, and close the loop so caught
+  anti-patterns become law the same day. Ships a symptom → check catalog
+  covering both code slop and the quieter killer, context rot.
+
 ### Project Planning
 
 - **[design-space](./skills/planning/design-space/SKILL.md)** — user-invoked
