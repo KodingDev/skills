@@ -6,6 +6,7 @@
     "./skills/engineering/orchestrate",
     "./skills/engineering/rehab",
     "./skills/planning/design-space",
+    "./skills/planning/linear-method",
     "./skills/planning/plan-project"
   ]
 }
