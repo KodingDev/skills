@@ -65,6 +65,17 @@ Pick the skills you want and which agents to install them on. That's it.
   one-page written space: live, dead (with reasons), open, and fixed. Holds the
   point of commitment open on purpose, and hands off to a build skill.
 
+- **[linear-method](./skills/planning/linear-method/SKILL.md)** — the
+  [Linear Method](https://linear.app/method) encoded as working rules rather than
+  background reading. Momentum is the thing being protected: initiatives that a
+  team can decide against without asking, goals derived backwards from the rung
+  before them, every priority call labelled enabler or blocker with a
+  now-or-later answer, projects that ship in 1–3 weeks with 1–3 people or get
+  staged until they do, issues that name a task instead of user stories,
+  two-week cycles that mix feature and quality work, design projects staged
+  rather than estimated, and launch-and-keep-launching over one dated moment.
+  Branches into `direction.md` (what to build) and `building.md` (doing it).
+
 - **[plan-project](./skills/planning/plan-project/SKILL.md)** — user-invoked
   (`/plan-project`). Takes a project from "I have ideas" — plus any design docs
   or ADRs — to a review-ready backlog: it reconciles messy intake, breaks the
