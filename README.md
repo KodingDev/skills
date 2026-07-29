@@ -44,6 +44,15 @@ Pick the skills you want and which agents to install them on. That's it.
   result), facts go in and verdicts come out, and deterministic tools shrink
   the corpus before any agent reads a byte.
 
+- **[pair](./skills/engineering/pair/SKILL.md)** — user-invoked (`/pair`).
+  Pair-programming mode: the agent stops being a contractor that returns with
+  a diff and becomes the colleague in the next chair. One move per turn — an
+  edit, a rename, an opinion about a fork — then the keyboard comes back to
+  you at a live decision point. Forks get talked through before typing, small
+  things (names, seams, boundaries) are treated as the real work, and there's
+  no finish line to sprint toward: the session ends when you end it. Pairs
+  well with manual permission mode for the full accept-each-edit feel.
+
 - **[rehab](./skills/engineering/rehab/SKILL.md)** — user-invoked (`/rehab`).
   Rehabilitates an AI-assisted codebase that's gone sloppy, on one law:
   enforce, don't instruct. Six stages — triage what actually runs vs what's
