@@ -30,6 +30,16 @@ Pick the skills you want and which agents to install them on. That's it.
   removal policies, construct anatomy, CDK Nag, and more. Returns a prioritized
   `file:line` report with a concrete fix per finding.
 
+- **[foreman](./skills/engineering/foreman/SKILL.md)** — user-invoked
+  (`/foreman`). Delivery orchestration for big multi-PR changes: one
+  orchestrator agent that writes no code itself — it runs Linear tickets,
+  cuts a fresh worktree per ticket, briefs workers, self-reviews, and puts
+  one human-reviewable PR per ticket in front of you. No stacked PRs, every
+  line reviewed, velocity from concurrency across disjoint file-scope lanes.
+  The invariants (the loop, brief template, PR conventions, scoped
+  authorization) live in the skill, so a new program needs only two thin
+  project files: a playbook of variables and a workplan of per-ticket briefs.
+
 - **[golden](./skills/engineering/golden/SKILL.md)** — build-time bias toward
   the durable version of whatever's being built. Kills the two classic failure
   modes (the converter that wraps the old mess, the speculative over-build) and
