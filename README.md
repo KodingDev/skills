@@ -38,6 +38,15 @@ Pick the skills you want and which agents to install them on. That's it.
   and doc comments on public surfaces, a DX pass to finish. Golden from the
   start instead of audit-and-refactor later.
 
+- **[lean-containers](./skills/engineering/lean-containers/SKILL.md)** — the
+  five rules that cover ~90% of container quality, applied whenever a
+  Dockerfile is written or reviewed: slim over alpine (musl recompiles what
+  glibc just installs), layer order as the cache strategy (peel the onion —
+  manifests, install, then source), `.dockerignore` instead of surgical
+  COPYs, builder stage as the bloat zone with scratch/distroless finals, and
+  digests pinned over movable tags. Plus the honest escape hatch: one process
+  per container is a vibe, not a law.
+
 - **[orchestrate](./skills/engineering/orchestrate/SKILL.md)** — judgment for
   multi-agent work: builders and critics never share incentives or context,
   cheap models compile while expensive models judge (and one brain reads the

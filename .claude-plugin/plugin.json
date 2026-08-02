@@ -3,6 +3,7 @@
   "skills": [
     "./skills/engineering/cdk-best-practices",
     "./skills/engineering/golden",
+    "./skills/engineering/lean-containers",
     "./skills/engineering/orchestrate",
     "./skills/engineering/pair",
     "./skills/engineering/rehab",
