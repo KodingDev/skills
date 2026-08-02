@@ -9,81 +9,71 @@ description: >
 
 # Orchestrate
 
-Multi-agent work fails in predictable ways: one agent grading its own
-homework, expensive models doing grunt work, subagents drowning in pasted
-conversation history, and fleets of agents re-reading raw data a one-line
-script could have filtered. The rules below are the judgment layer — they
-apply whatever the dispatch mechanism (subagent tools, workflow scripts,
-parallel sessions).
+Multi-agent work fails in known ways: one agent grades its own work, expensive models do
+simple work, subagents drown in pasted conversation history, and fleets of agents read raw
+data that a one-line script can filter. The rules below are the judgment layer. They apply
+to each dispatch mechanism: subagent tools, workflow scripts, and parallel sessions.
 
 ## Builder and critic never share incentives
 
-Don't try to make one agent honest with itself. An agent that produced work —
-or can see the reasoning that produced it — cannot fathom that the reasoning
-was wrong; its second pass comes back suspiciously clean. Split the roles:
+Do not try to make one agent honest with itself. An agent that produced work, or that can see
+the reasoning behind it, cannot see that the reasoning was wrong. Its second pass comes back
+clean, and that is a warning sign. Split the roles:
 
-- The builder builds. The critic sees only the artifact (diff, spec, report)
-  and its rubric — never the builder's reasoning or the orchestrator's opinion
-  of the work.
-- Give critics no edit tools where the mechanism allows it; report-only should
-  be structural, not requested.
-- For contested or load-bearing findings, make the critic adversarial: prompt
-  it to *refute* the claim, not to confirm it. A finding that survives a
-  genuine refutation attempt is worth acting on.
+- The builder builds. The critic sees only the artifact (diff, spec, report) and its rubric.
+  The critic never sees the builder's reasoning or your opinion of the work.
+- If the mechanism permits it, give critics no edit tools. Make report-only structural, not
+  requested.
+- For contested or load-bearing findings, make the critic adversarial. Tell it to *refute*
+  the claim, not to confirm the claim. If a finding survives a genuine refutation attempt,
+  act on it.
 
 ## Tier the models to the work
 
-Match model strength to what each stage actually demands, not to what feels
-respectful of the task:
+Match model strength to what each stage demands, not to what feels respectful of the task:
 
-- **Compile cheap.** Extraction, classification, per-chunk summarization, and
-  any stage whose prompt fully specifies the job — cheapest capable tier, wide
-  fan-out.
-- **Judge expensive.** Synthesis across many reports, adversarial verification,
-  and anything requiring taste or cross-cutting judgment — strongest tier,
-  few agents.
-- **One brain reads the result.** The orchestrator reads the final synthesis
-  itself, once — it does not delegate its own conclusion, and it does not
-  re-read the raw inputs the fleet already covered.
+- **Compile cheap.** Use the cheapest capable tier, with wide fan-out, for extraction,
+  classification, per-chunk summarization, and each stage whose prompt fully specifies the
+  job.
+- **Judge expensive.** Use the strongest tier, with few agents, for synthesis across many
+  reports, for adversarial verification, and for each task that needs taste or cross-cutting
+  judgment.
+- **One brain reads the result.** Read the final synthesis yourself, one time. Do not
+  delegate your own conclusion. Do not read again the raw inputs that the fleet covered.
 
-Defaulting every subagent to the orchestrator's own tier is the expensive
-failure: a 25-agent fan-out at flagship pricing to do what a small model does
-identically.
+The expensive failure is to give each subagent your own tier: a 25-agent fan-out at flagship
+prices for work that a small model does the same.
 
 ## Facts in, verdicts out
 
-A subagent starts blank and returns a result — treat both ends strictly:
+A subagent starts blank and returns a result. Control both ends:
 
-- **In:** exactly what the task needs — paste content into the prompt rather
-  than having agents rediscover it; state the output format explicitly. Never
-  conversation history, never your reasoning about the user's intent.
-- **Out:** verdicts, findings, and facts. Reasoning chains, hedging, and
-  narration from a subagent are contamination — specify a structured result
-  and consume only that.
+- **In:** give exactly what the task needs. Paste content into the prompt. Do not make agents
+  discover it again. State the output format. Never send conversation history. Never send
+  your reasoning about the user's intent.
+- **Out:** accept verdicts, findings, and facts. Reasoning chains, hedges, and narration from
+  a subagent are contamination. Specify a structured result and consume only that.
 
 ## Determinism before tokens
 
-Before any agent reads anything, do the deterministic work with deterministic
-tools:
+Before an agent reads anything, do the deterministic work with deterministic tools:
 
-- **Shrink the corpus first.** grep/jq/scripts filter gigabytes to the
-  megabytes that matter; agents read the residue, never the raw pile. If a
-  filter can be expressed as code, it is not an agent's job.
-- **Known work-list → deterministic fan-out.** When the items are enumerable
-  up front (files, chunks, findings), dispatch one agent per item from a
-  script or loop you control. Model-driven "keep going until done" loops are
-  for genuinely unknown-size discovery only.
-- **Pin the chunking.** Split inputs to fit comfortably in a worker's context
-  with room to think; a worker that got a truncated chunk returns confident
-  garbage, not an error.
+- **Shrink the corpus first.** Use grep, jq, or scripts to filter gigabytes down to the
+  megabytes that matter. Agents read the residue, never the raw pile. If code can express the
+  filter, the filter is not the job of an agent.
+- **Known work-list → deterministic fan-out.** If you can enumerate the items up front
+  (files, chunks, findings), dispatch one agent per item from a script or loop that you
+  control. Use model-driven "continue until done" loops only for discovery of unknown size.
+- **Pin the chunking.** Split the inputs so that each chunk fits in the context of a worker,
+  with room to think. A worker that got a truncated chunk returns confident garbage, not an
+  error.
 
 ## Done when
 
-- No agent read raw data a script could have filtered first.
-- Every stage runs on the cheapest tier that can do it verbatim; judgment
-  stages are the only expensive ones.
-- No verdict came from an agent that saw the reasoning it was judging.
-- Enumerable work-lists were fanned out by a script or loop you control, and
-  every chunk fit its worker's context whole.
-- The orchestrator formed the final conclusion itself, from the synthesis, in
-  one read.
+- No agent read raw data that a script can filter first.
+- Each stage runs on the cheapest tier that can do it. Only the judgment stages are
+  expensive.
+- No verdict came from an agent that saw the reasoning that it judged.
+- A script or loop that you control fanned out each enumerable work-list. Each chunk fit
+  whole in the context of its worker.
+- You formed the final conclusion yourself, from the synthesis, in one read.

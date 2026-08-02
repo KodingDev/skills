@@ -11,23 +11,22 @@ description: >
 
 # Lean Containers
 
-Five rules that cover ~90% of container quality. Apply every rule that touches
-the Dockerfile in front of you; call out violations even when unasked.
+Five rules cover approximately 90% of container quality. Apply each rule that touches the
+Dockerfile in front of you. Call out violations even when the user did not ask.
 
 ## 1. Slim over alpine
 
-Alpine uses musl libc; nearly all prebuilt native artifacts (Python wheels,
-Node native modules) target glibc. On alpine they recompile from source —
-needing `build-base` toolchains, multiplying build time — or silently run
-slower. Default to `-slim` (glibc, ~90 MB over alpine) and let binaries
-install as binaries. Reach for alpine only when everything in the image is
-pure or you control the whole toolchain.
+Alpine uses musl libc. Almost all prebuilt native artifacts (Python wheels, Node native
+modules) target glibc. On alpine, they compile from source, which needs `build-base`
+toolchains and multiplies build time. Or they run slower, silently. Default to `-slim`:
+glibc, approximately 90 MB more than alpine. Then binaries install as binaries. Use alpine
+only when everything in the image is pure, or when you control the whole toolchain.
 
 ## 2. Layer order is your cache strategy
 
-Docker reuses layers until an earlier input changes. Structure the Dockerfile
-as an onion: outermost layers change most often, so peel from the outside —
-copy dependency manifests first, install, *then* copy source.
+Docker reuses layers until an earlier input changes. Structure the Dockerfile as an onion.
+The outermost layers change most often, so peel from the outside: copy the dependency
+manifests first, install, *then* copy the source.
 
 ```dockerfile
 COPY package.json package-lock.json ./
@@ -35,34 +34,31 @@ RUN npm ci
 COPY . .
 ```
 
-A code edit now invalidates only the final copy; the install layer stays
-cached. Use the lockfile-strict installer (`npm ci`, not `npm install`).
+Now a code edit invalidates only the final copy. The install layer stays cached. Use the
+lockfile-strict installer (`npm ci`, not `npm install`).
 
 ## 3. .dockerignore, not surgical COPYs
 
-`COPY . .` is fine — the bad pattern is a dirty build context. Ignore
-`node_modules`, `.git`, logs, and build artifacts in `.dockerignore` instead
-of maintaining a mile-long list of per-file COPY lines. Every Dockerfile ships
-with one.
+`COPY . .` is fine. The bad pattern is a dirty build context. Put `node_modules`, `.git`,
+logs, and build artifacts in `.dockerignore`. Do not maintain a long list of per-file COPY
+lines. Each Dockerfile ships with a `.dockerignore`.
 
 ## 4. Builder stage is the bloat zone
 
-Multi-stage: compile in a `builder` stage, and the final stage carries runtime
-only — for compiled languages, copy the one binary. `FROM scratch` is the
-floor (a Go hello-world lands ~2 MB); distroless is the practical pick when
-you want CA certs, a nonroot user, and sane defaults without a shell or
-package manager.
+Use a multi-stage build. Compile in a `builder` stage. The final stage carries the runtime
+only. For compiled languages, copy the one binary. `FROM scratch` is the floor: a Go
+hello-world lands at approximately 2 MB. Distroless is the practical choice when you want CA
+certs, a nonroot user, and sane defaults, without a shell or a package manager.
 
 ## 5. Digests over tags
 
-Tags move — `latest`, `nightly`, even version tags, especially on internal
-registries. Pin the base image by digest
-(`node:26-slim@sha256:…`, from `docker buildx imagetools inspect`) so the
-build is reproducible regardless of what the tag points at tomorrow.
+Tags move: `latest`, `nightly`, and even version tags, especially on internal registries. Pin
+the base image by digest (`node:26-slim@sha256:…`, from `docker buildx imagetools inspect`).
+Then the build is reproducible, whatever the tag points at tomorrow.
 
 ## Escape hatch: two processes, one container
 
-One process per container is a vibe, not a law. When an app genuinely needs a
-sidecar-in-the-same-box (nginx in front of an app server) and you're not at
-orchestrator scale, run both under `supervisord` with autorestart rather than
-paying the complexity of a second container.
+One process per container is a vibe, not a law. Sometimes an app needs a sidecar in the same
+box (nginx in front of an app server), and you are not at orchestrator scale. Then run both
+under `supervisord` with autorestart. That costs less than the complexity of a second
+container.
