@@ -5,7 +5,7 @@ Skills for daily code work.
 | Skill | What it does |
 | --- | --- |
 | [`cdk-best-practices`](./cdk-best-practices/SKILL.md) | Audit AWS CDK code against the best-practices rule catalog and produce a prioritized, `file:line` report. |
-| [`foreman`](./foreman/SKILL.md) | User-invoked (`/foreman`). Delivery orchestration for big changes: Linear tickets, worktree-per-ticket branches, worker fan-out, one human-reviewable PR per ticket — every line reviewed, velocity from disjoint lanes. |
+| [`foreman`](./foreman/SKILL.md) | User-invoked (`/foreman`). Delivery orchestration for big changes: tracker tickets, worktree-per-ticket branches, worker fan-out, one human-reviewable PR per ticket — every line reviewed, velocity from disjoint lanes. |
 | [`golden`](./golden/SKILL.md) | Build-time bias toward the durable version of whatever's being built — golden from the start, exactly as simple as the problem's shape. |
 | [`lean-containers`](./lean-containers/SKILL.md) | Container image discipline for writing or reviewing Dockerfiles: slim over alpine, layer-order caching, `.dockerignore`, multi-stage builds, digest pinning. |
 | [`orchestrate`](./orchestrate/SKILL.md) | Judgment for multi-agent work: builder/critic splits, model tiering, context hygiene, deterministic pre-extraction. |

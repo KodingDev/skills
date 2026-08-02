@@ -8,15 +8,15 @@ line would be true of every program, it belongs in the skill, not the playbook: 
 
 You need a fixed plan before orchestration starts: an architecture spec, design reports,
 or an approved plan document. Foreman executes a plan; it does not produce one. If no
-plan exists, stop and plan first (`/design-space`, `/plan-project`, or a plain planning
-session), then come back.
+plan exists, stop and plan first, then come back.
 
-## 1 · Linear project and tickets
+## 1 · Tracker project and tickets
 
-Build the project with the user, not for them. Per ticket:
+Build the project with the user, not for them, in whatever issue tracker they use. Per
+ticket:
 
-- One vertical slice with a crisp acceptance line. Follow `/linear-method` sizing:
-  a ticket a reviewer can hold in their head as one PR.
+- One vertical slice with a crisp acceptance line — a ticket a reviewer can hold in
+  their head as one PR.
 - Cite the spec sections that define its target shape — the workplan pastes from these.
 - Encode real dependencies as blocked-by edges. These, plus lane disjointness, are the
   only scheduling constraints; do not invent phases.
@@ -43,11 +43,13 @@ Repo paths; base branch; any submodule or environment trap that fails silently
 Lane → tickets → file scope. Serial orders within lanes. Which milestone opens/closes
 the program.
 
-## Authorization
-The standing grant, scoped to these tickets exactly. Per-instance approvals (deploys,
-rebakes, anything customer-visible). The stop-and-ask list: the specific situations
-where the foreman stops — an unexplained behavior change, two lanes needing one file,
-a spec found materially wrong, a ticket's real scope exceeding its brief.
+## Authorization (if any) and stop-and-ask
+Any standing grant the user chooses to give (e.g. push branches and open PRs for these
+tickets without per-PR approval), scoped to these tickets exactly; absent a grant,
+normal approval rules apply. Per-instance approvals (deploys, anything
+customer-visible). The stop-and-ask list: the specific situations where the foreman
+stops — an unexplained behavior change, two lanes needing one file, a spec found
+materially wrong, a ticket's real scope exceeding its brief.
 
 ## Verification recipes
 Per slice type, what "verified" means and the evidence artifact it produces: the exact
@@ -79,4 +81,5 @@ and first schedule in a few sentences, verify preconditions, open the first unbl
 tickets, run the loop. Include how the user wants milestone notifications (each PR
 opened, each merge, any blocker — not routine progress).
 
-Get the user's explicit sign-off on the authorization section before the first push.
+If the playbook carries a standing authorization, get the user's explicit sign-off on
+it before the first push.
