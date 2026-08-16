@@ -24,6 +24,16 @@ Pick the skills you want and which agents to install them on. That's it.
 
 ### Engineering
 
+- **[canon](./skills/engineering/canon/SKILL.md)** — golden's sibling for the
+  understanding stage: porting a decompiled reference, reading a library or
+  serialized format from the outside, chasing a regression. The record is
+  canon; a story about what the system might do is headcanon. Four-part creed
+  — it is deterministic, there is always a pointer, there is always a source,
+  and it was built the smart generic way — plus a smell catalog for headcanon
+  (constructed paths, invented taxonomies, invented corrections, downstream
+  patches, bespoke subsystems, accumulating cutouts) and the loop that
+  replaces each with a traced, source-cited fix.
+
 - **[cdk-best-practices](./skills/engineering/cdk-best-practices/SKILL.md)** —
   point it at AWS CDK code (a file, a construct, a whole package) and it audits
   against a 27-rule catalog: least-privilege grants, broad IAM, hardcoded names,
