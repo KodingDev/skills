@@ -53,6 +53,9 @@ A subagent starts blank and returns a result. Control both ends:
   your reasoning about the user's intent.
 - **Out:** accept verdicts, findings, and facts. Reasoning chains, hedges, and narration from
   a subagent are contamination. Specify a structured result and consume only that.
+- **Persist before you synthesize.** Write fleet findings to a file as they land; a
+  compaction must not lose what the fleet paid for.
+- **Reap what you spawned** when a stage closes: agents, dev servers, shells, worktrees.
 
 ## Determinism before tokens
 

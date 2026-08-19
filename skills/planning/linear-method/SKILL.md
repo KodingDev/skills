@@ -1,6 +1,6 @@
 ---
 name: linear-method
-description: The Linear Method — momentum-first product practice: initiatives and goals, enablers vs blockers, projects scoped to 1–3 weeks, issues instead of user stories, n-week cycles, launch and keep launching. Use when setting product direction or goals, prioritizing a roadmap, scoping a project, writing issues or a project spec, planning cycles or a backlog, running a design project, or planning a launch or changelog — and when another skill needs these conventions.
+description: "The Linear Method — momentum-first product practice: initiatives and goals, enablers vs blockers, projects scoped to 1–3 weeks, issues instead of user stories, n-week cycles, launch and keep launching. Use when setting product direction or goals, prioritizing a roadmap, scoping a project, writing issues or a project spec, planning cycles or a backlog, running a design project, or planning a launch or changelog; when filing or publishing issues, specs, or tickets into Linear (projects vs parent issues and sub-issues, branch and PR linking); and when another skill needs these conventions."
 ---
 
 # Linear Method

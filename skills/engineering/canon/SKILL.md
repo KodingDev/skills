@@ -33,7 +33,9 @@ known root and resolve the chain, link by link. A constructed path — string
 templating, a naming convention, a guessed directory layout — is a guess
 wearing the costume of a lookup: right until the first entry that breaks the
 pattern, and that break is a bug you wrote. The resolved pointer is right for
-the same reason the system is right: it reads the same bytes.
+the same reason the system is right: it reads the same bytes. A key into a
+keyed table is not a constructed path; the smell is an assembled location
+where the system stores a reference.
 
 **There is always a source.** Every value and behavior you reproduce is defined
 upstream: the reference code, the format spec, the system's own
@@ -115,6 +117,9 @@ When behavior surprises you:
 3. Follow the pointers from a known root down to the concrete failing case.
 4. Only then change something. The diff cites a source for every value,
    transform, and path it introduces.
+
+"Unknown mechanism" is a finding, not an exit. Before you name one, show the
+first divergence point: where the real system and yours part ways.
 
 ## Done when
 

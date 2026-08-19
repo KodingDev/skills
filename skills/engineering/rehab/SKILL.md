@@ -30,6 +30,12 @@ that slice. The findings of stage 1 drive everything after it. Each later stage 
 consumes. The symptom → check catalog is in [symptoms.md](symptoms.md). Read it when stage 1
 or stage 4 runs.
 
+Each stage lands on its own branch and PR off main. Never commit a rehab stage straight to
+main; the user reviews the map, the diet, and the law like any other change. A check script
+the rehab writes is a public surface: it gets a header that states what it checks and where
+it runs, and a one-line *why* on each rule that is not obvious. Rehab is a repo-wide pass; a
+single-PR cleanup is not rehab.
+
 ## 1. Triage
 
 Diagnose before you treat. Read the repo: code, configuration, CI, and git log. Divide what

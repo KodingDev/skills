@@ -2,9 +2,10 @@
 name: golden
 description: >
   Golden-from-the-start engineering: build the durable version of anything
-  new. Use when designing or building a new feature, API, module, or package,
-  when professionalizing a prototype, or when the user says "golden",
-  "gorgeous", "prod grade", or "built to last".
+  new, and hold existing code to the same bar. Use when designing or building
+  a new feature, API, module, or package, when professionalizing a prototype,
+  when reviewing a diff or module for shape and quality, or when the user says
+  "golden", "gorgeous", "prod grade", or "built to last".
 ---
 
 # Golden
@@ -19,7 +20,9 @@ Two failure modes kill more codebases than bugs do. Prevent both:
   that puts new paint on the old mess. A wrapped bad shape is not a replaced shape. The mess
   is now load-bearing *and* hidden. If you can build the golden shape in this change, build
   it. If you cannot, say so and scope an honest intermediate step. Do not present a converter
-  as the abstraction.
+  as the abstraction. Golden assumes zero refactor cost: no compatibility layer, no
+  tombstones, no 1:1 port of a shape nobody wants, unless the user asks for compatibility.
+  Replace and delete; history keeps the old shape.
 - **The over-build.** Speculative generality, configuration that nobody asked for, a
   framework where a function is sufficient. If the user asks for a dump, give a dump — not a
   pipeline that parses and audits the dump. Deliver the shape of this problem, not the shape
@@ -37,6 +40,11 @@ role. A scheduled report is a report with a timer. An alert channel is a transpo
 format. Before you add a new kind, type, or flag with its own logic, ask what generic thing
 it is. The special part is usually data (a name, a threshold, a table entry), not a type with
 its own machinery.
+
+**Boundaries hold.** A generic layer — engine, core, shared — carries no domain vocabulary,
+in identifiers, comments, or branches. A product name in a shared module is a special case
+wearing a name. The generic layer exposes a hook or a data slot; the domain fills it from
+its own package.
 
 **Schema-first contracts.** Define each data shape once — as a schema, type, dataclass, or
 proto, whatever the stack offers. Derive the validation, the parsing, and the defaults from
@@ -61,12 +69,23 @@ place only when it states a *why* that is not obvious: a hidden constraint, or a
 for a specific bug. One line is the maximum. Delete everything else — what the next line
 does, the plan, what changed, an essay above a statement. That text is chain-of-thought that
 leaked into the file. Reasoning lives in the chat and in the PR conversation. The code stays
-clean.
+clean. Section banners, change-log comments, and notes git history already holds are
+narration too.
+
+**Tests are scarce and load-bearing.** A few generic tests through shared builders, not a
+fixture wall or a test per named case. No hard-coded environment, no side effects, no
+integration tests unless asked.
 
 **Finish with a DX pass.** Working code is the floor. When the code works, spend one pass as
 your own consumer. Call the API cold. Wire the component up fresh. Each point of friction is
 a defect: a name that confuses, a boilerplate ritual, an error that does not say what to do.
 Fix each defect now, while the context is loaded.
+
+## As a review lens
+
+On a diff, a PR, or an existing module, the bar above is the rubric. Name the golden shape
+in a sentence or two, then fix what you found in place; list only when the user says
+report-only.
 
 ## Contrast
 
@@ -114,6 +133,7 @@ function send(alert: Alert, channel: Channel) {
 ## Done when
 
 - The next likely case touches data, not logic. Name the case and make sure that this holds.
+- No domain vocabulary in a generic layer; no tombstone the user did not ask to keep.
 - Nothing wraps or converts a shape that you had the reach to replace.
 - Each data shape is declared once, as a schema or type. Its validation, parsing, and
   defaults derive from that declaration.
@@ -124,4 +144,5 @@ function send(alert: Alert, channel: Channel) {
   to a working call without the source.
 - No comment in the diff narrates what the code says. Each comment that remains is a one-line
   *why* that is not obvious.
+- Tests are few, generic, and side-effect free.
 - You did the DX pass and corrected what it found. You did not file it.

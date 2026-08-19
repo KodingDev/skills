@@ -1,6 +1,14 @@
 ---
 name: cdk-best-practices
-description: Audit an AWS CDK module, construct, stack, or package against AWS CDK best practices (project structure, IAM/grants, constructs, testing, CDK Nag, removal policies, anti-patterns). Use when the user asks to review/check/audit CDK code, a CDK construct or stack, a cdk module, or asks "is this CDK code following best practices".
+description: >
+  Audit an AWS CDK module, construct, stack, or package against AWS CDK best
+  practices (project structure, IAM/grants, constructs, testing, CDK Nag,
+  removal policies, cross-stack boundaries, cost defaults, anti-patterns) and
+  fix what it finds. Use when the user asks to review/check/audit CDK code, a
+  CDK construct or stack, a cdk module, or asks "is this CDK code following
+  best practices"; also use as a self-check before handing over CDK code you
+  wrote in this session. Complements the aws-cdk authoring skill: that one
+  says how to write it, this one checks what was written.
 ---
 
 # CDK Best Practices
@@ -40,7 +48,12 @@ for each rule. Read it before you audit. The workflow and the rule index are bel
 5. **Report.** Group the findings by severity. For each finding, give the `file:line`, the
    rule name, what you found, one line on why it is important, and the fix. If the code
    follows some practices well, end with a short "Strengths" note. If there are no strengths,
-   omit the note. Recommend each fix. Do not rewrite the code unless the user asks.
+   omit the note.
+
+6. **Fix or recommend.** On code you wrote in this session, or when the user says "fix",
+   apply the fixes and show the diff; the report is then the changelog. On code you did not
+   write and were asked to audit, recommend each fix and do not rewrite until the user says
+   so.
 
 ## Rule index
 
@@ -77,6 +90,8 @@ the code to confirm each hit.
 | 25 | Mutation Aspects cautious; validation/tagging Aspects safe | Medium | `implements IAspect`; `visit(` that mutates props |
 | 26 | Mutation Aspects only for org-wide policy, not per-resource configuration | Medium | `IAspect` that mutates individual resource configuration |
 | 27 | Compliance is layered (constructs + Nag + boundaries/SCPs), not a wrapper construct alone | Medium | wrapper constructs as the only enforcement |
+| 28 | Stacks of different systems do not import each other; share by SSM/export contract | Medium | `import .*Stack` across system directories; another system's stack as a prop |
+| 29 | Cost is a default: on-demand first, log retention set, no idle NAT, lifecycle rules | Medium | `NatGateway\|natGateways:`; `billingMode: PROVISIONED`; `new LogGroup` without `retention`; `new Bucket` without `lifecycleRules` |
 
 ## Output template
 
