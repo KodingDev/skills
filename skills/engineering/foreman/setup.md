@@ -1,8 +1,10 @@
 # Setting up a program
 
-Run this once, before the loop. The output is two thin files plus a Linear project. The
-invariants live in SKILL.md — the files below hold only what varies per program. If a
-line would be true of every program, it belongs in the skill, not the playbook: delete it.
+Run this once, before the loop. The output is a tracker project plus two thin files in
+`.foreman/`. The tracker is the system of record; `.foreman/` is local scratch, never
+committed. The invariants live in SKILL.md — the files below
+hold only what varies per program. If a line would be true of every program, it belongs
+in the skill, not the playbook: delete it.
 
 ## Inputs
 
@@ -26,8 +28,7 @@ scopes overlap; lanes run parallel, tickets within a lane run serial.
 
 ## 2 · PLAYBOOK.md
 
-Location: with the plan docs (e.g. `plans/<program>/PLAYBOOK.md`). Contents — variables
-only:
+Location: `.foreman/PLAYBOOK.md`, untracked. Contents — variables only:
 
 ```
 # Playbook — <program name>
@@ -60,7 +61,7 @@ mechanism tests with shared builders, not fixture walls.
 
 ## 3 · WORKPLAN.md
 
-One entry per ticket, a few lines each:
+Location: `.foreman/WORKPLAN.md`, untracked. One entry per ticket, a few lines each:
 
 ```
 ## T<n> · <ticket-id> · <title> — spec: <sections>
@@ -70,8 +71,9 @@ One entry per ticket, a few lines each:
 **Traps:** ticket-specific forbiddens and known landmines.
 ```
 
-End the file with a `## Standing deltas` section, empty at start. Review feedback that
-changes a target shape gets appended here, dated, so later tickets inherit it.
+Standing deltas — review feedback that changes a target shape — go on the tracker
+project (a description block or a pinned comment), dated, so later tickets and later
+sessions inherit them. The workplan only mirrors them.
 
 ## 4 · Kickoff
 
@@ -82,4 +84,6 @@ tickets, run the loop. Include how the user wants milestone notifications (each 
 opened, each merge, any blocker — not routine progress).
 
 If the playbook carries a standing authorization, get the user's explicit sign-off on
-it before the first push.
+it before the first push. Grants change mid-program ("full auto" tonight, "no auto
+merging, I'm home" tomorrow); the latest word in the session wins, and the playbook is
+updated to match.

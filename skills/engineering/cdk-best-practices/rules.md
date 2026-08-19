@@ -221,6 +221,24 @@ time), (2) CDK Nag + Aspects (authoring time), (3) permissions boundaries + SCPs
 bypass), (4) CloudFormation Guard. Layers 1–2 catch issues early; 3–4 are the hard backstop. Wrapper
 constructs also block consuming AWS Solutions Constructs / Construct Hub constructs — weigh that trade-off.
 
+## Boundaries & Cost
+
+### 28. Stacks of different systems do not import each other
+A stack that `import`s another system's stack class, or takes its construct as a prop, welds two
+deploy units together: one cannot deploy, test, or delete without the other, and a rename in one
+breaks the other's synth. Share across systems by contract instead — SSM parameters, CloudFormation
+exports/`Fn.importValue`, or a typed lookup by a stable name — and keep each system's stack graph
+closed. Inside one system, passing constructs between stacks is fine; that is what cross-stack
+references are for.
+
+### 29. Cost is a default, not an afterthought
+Infrastructure code sets the bill. Choose the cheap default where the workload allows it: on-demand
+over provisioned capacity until a steady load is measured; a log retention on every log group (never
+infinite); no NAT gateway for a workload that can sit in public subnets with security groups or use
+VPC endpoints; the smallest instance/memory that meets the measured need; lifecycle rules on
+buckets that hold artifacts. Flag a resource whose cost is open-ended (unbounded logs, provisioned
+capacity with no autoscaling, an idle NAT) as a finding, with the cheaper shape as the fix.
+
 ---
 
 ## Anti-pattern quick list
@@ -231,3 +249,5 @@ constructs also block consuming AWS Solutions Constructs / Construct Hub constru
 5. Overly broad IAM (`grantReadWrite` when `grantRead` suffices; `iam:*`) → least privilege (rules 1–2)
 6. Nesting stateful resources in volatile constructs → logical ID churn / data loss (rule 7)
 7. Wrapper constructs as sole compliance enforcement → layer it (rule 27)
+8. One system's stack importing another's → share by SSM/export contract (rule 28)
+9. Open-ended cost shapes (infinite logs, idle NAT, unmeasured provisioned capacity) → cheap default (rule 29)

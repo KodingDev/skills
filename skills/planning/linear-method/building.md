@@ -59,6 +59,21 @@ work is delegated with an expectation of delivery, and execution mode begins.
 **Done when:** every issue names a task with a defined outcome, has a scannable title, and was
 written by the person doing the work (or is an explicitly-framed request awaiting rewrite).
 
+### Filing into Linear
+
+When the issues land in Linear (by hand, by API, or by an agent), three conventions hold:
+
+- **Project vs parent issue.** A project is a 1–3 week outcome with its own milestones and status
+  updates. A spec that breaks into a handful of tasks is a **parent issue with sub-issues**, about
+  two levels deep — not a project. Reach for a project only when the work needs a roll-up of its
+  own; a parent issue is the default for "one spec, several tickets".
+- **Branch carries the key.** The branch name includes the issue key (`feat/ABC-123-...`), so Linear
+  links the branch and PR to the issue and moves state on its own. Rename a branch that was cut
+  before the issue existed; do it before the first push.
+- **Spec on the parent, tasks on the children.** The parent issue holds the spec (the why, the
+  scope, the acceptance criteria). Each sub-issue names one tangible task and links back; it does
+  not restate the spec.
+
 ## Manage design projects
 
 Source: [linear.app/method/manage-design-projects](https://linear.app/method/manage-design-projects)

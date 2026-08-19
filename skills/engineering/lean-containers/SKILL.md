@@ -11,7 +11,8 @@ description: >
 
 # Lean Containers
 
-Five rules cover approximately 90% of container quality. Apply each rule that touches the
+Measure before you touch: `docker history <image>` names the fat layer, and the fix
+targets its cause. Five rules cover approximately 90% of container quality. Apply each rule that touches the
 Dockerfile in front of you. Call out violations even when the user did not ask.
 
 ## 1. Slim over alpine

@@ -1,6 +1,6 @@
 ---
 name: design-space
-description: A conversational charrette that ends in a written design space — thesis, anti-references, axes, and competing corners — before any code, comp, or palette exists.
+description: A conversational charrette that ends in a written design space — thesis, anti-references, axes, and competing corners — before any code, comp, or palette exists. Conversation only, no renders, no variants; the written page is the whole output.
 disable-model-invocation: true
 ---
 

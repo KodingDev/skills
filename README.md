@@ -44,7 +44,7 @@ Pick the skills you want and which agents to install them on. That's it.
   (`/foreman`). Delivery orchestration for big multi-PR changes: one
   orchestrator agent that writes no code itself — it runs issue-tracker
   tickets, cuts a fresh worktree per ticket, briefs workers, self-reviews,
-  and puts one human-reviewable PR per ticket in front of you. No stacked
+  and puts one human-reviewable PR per ticket per repo in front of you. No stacked
   PRs, every line reviewed, velocity from concurrency across disjoint
   file-scope lanes. The invariants (the loop, brief template, PR
   conventions, stop-and-ask discipline) live in the skill, so a new program
@@ -55,9 +55,10 @@ Pick the skills you want and which agents to install them on. That's it.
   the durable version of whatever's being built. Kills the two classic failure
   modes (the converter that wraps the old mess, the speculative over-build) and
   holds the bar: one source of truth, nothing special, schema-first contracts,
-  composable pieces, damn simple, zero comment narration, precise signatures
-  and doc comments on public surfaces, a DX pass to finish. Golden from the
-  start instead of audit-and-refactor later.
+  boundaries that hold, composable pieces, damn simple, zero comment
+  narration, scarce tests, precise signatures and doc comments on public
+  surfaces, a DX pass to finish. Golden from the start instead of
+  audit-and-refactor later, and the same bar as a review lens.
 
 - **[lean-containers](./skills/engineering/lean-containers/SKILL.md)** — the
   five rules that cover ~90% of container quality, applied whenever a
@@ -80,7 +81,7 @@ Pick the skills you want and which agents to install them on. That's it.
   edit, a rename, an opinion about a fork — then the keyboard comes back to
   you at a live decision point. Forks get talked through before typing, small
   things (names, seams, boundaries) are treated as the real work, and there's
-  no finish line to sprint toward: the session ends when you end it. Pairs
+  no finish line to sprint toward: the session ends when you hand it off. Pairs
   well with manual permission mode for the full accept-each-edit feel.
 
 - **[rehab](./skills/engineering/rehab/SKILL.md)** — user-invoked (`/rehab`).
