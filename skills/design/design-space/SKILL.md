@@ -1,6 +1,10 @@
 ---
 name: design-space
-description: A conversational charrette that ends in a written design space — thesis, anti-references, axes, and competing corners — before any code, comp, or palette exists. Conversation only, no renders, no variants; the written page is the whole output.
+description: >
+  A conversational charrette that ends in a written design space — thesis,
+  anti-references, axes, and competing corners — before any code, comp, or
+  palette exists. Conversation only, no renders, no variants; the written page
+  is the whole output, and a build skill executes against it.
 disable-model-invocation: true
 ---
 
@@ -151,9 +155,13 @@ Maintain three buckets as you go: **live**, **dead** (with the reason), and **op
 ## Landing
 
 Write the page where the project keeps planning docs (`plans/`, `docs/`, `.meridian/specs/`).
-If there is no convention, ask once. Then name what takes the page: a design or build pass
-for a surface, a throwaway prototype when a corner must be felt before it can be judged, or a
-planning pass when the space is settled and the work needs breakdown.
+If there is no convention, ask once. Then name what takes the page:
+
+- **A brand or identity to establish** — [`design-uplift`](../design-uplift/SKILL.md). It reads
+  this page as its ground, then runs the exploration passes the charrette refused to run.
+- **A corner that must be felt before it can be judged** — a throwaway prototype of that one
+  corner, then back here to mark it.
+- **The space settled and the work needing breakdown** — a planning pass.
 
 The page **replaces** the discovery round of the next step. It does not precede it. Hand the
 page over as answered input — audience, job, tone, constraints, and what was already ruled

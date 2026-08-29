@@ -1,6 +1,8 @@
 {
   "name": "skills",
   "skills": [
+    "./skills/design/design-space",
+    "./skills/design/design-uplift",
     "./skills/engineering/canon",
     "./skills/engineering/cdk-best-practices",
     "./skills/engineering/foreman",
@@ -9,7 +11,6 @@
     "./skills/engineering/orchestrate",
     "./skills/engineering/pair",
     "./skills/engineering/rehab",
-    "./skills/planning/design-space",
     "./skills/planning/linear-method",
     "./skills/planning/plan-project"
   ]

@@ -1,6 +1,8 @@
 Skills live under `skills/`, grouped into bucket folders by purpose:
 
+- `design/` — bounding a design space, then building the identity
 - `engineering/` — daily code work
+- `planning/` — turning direction into an executable backlog
 
 Each skill is a directory containing a `SKILL.md` (the entry point) plus any
 support files it references (e.g. `rules.md`, examples).

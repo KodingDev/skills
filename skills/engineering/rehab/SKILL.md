@@ -1,6 +1,10 @@
 ---
 name: rehab
-description: Rehabilitate an AI-assisted codebase that has gone sloppy — audit the slop, fix the map the agent reads, put the rules file on a diet, convert prose into enforced checks, pay down the worst debt behind characterization tests, and close the loop so it stays clean.
+description: >
+  Rehabilitate an AI-assisted codebase that has gone sloppy — audit the
+  slop, fix the map the agent reads, put the rules file on a diet, convert
+  prose into enforced checks, pay down the worst debt behind
+  characterization tests, and close the loop so it stays clean.
 disable-model-invocation: true
 ---
 

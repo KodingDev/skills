@@ -22,6 +22,30 @@ Pick the skills you want and which agents to install them on. That's it.
 
 ## What's inside
 
+### Design
+
+- **[design-space](./skills/design/design-space/SKILL.md)** — user-invoked
+  (`/design-space`). A charrette that runs before a line of code: it grounds in
+  what already exists, lands a one-sentence thesis and three *named*
+  anti-references, names the 3–5 axes the design actually varies on, then
+  generates 4–6 mutually incompatible corners and presents them flat — no
+  ranking, because a ranked list gets the safest card picked. Ends with a
+  one-page written space: live, dead (with reasons), open, and fixed. Holds the
+  point of commitment open on purpose, then hands the page to `design-uplift`.
+
+- **[design-uplift](./skills/design/design-uplift/SKILL.md)** — the build half
+  of that pair, and the loop that turns "functional but bland" into
+  "unmistakably theirs". It reads the space page as answered input, locks a
+  foundation (OKLCH tokens, type stack, voice, surface rhythm), then runs
+  numbered exploration passes to one republished artifact — big swings, not
+  tweaks — screenshot-verifying every pass before the user sees it and putting
+  marks through the small-size gauntlet (96/32/20px, browser tab, avatar, app
+  icon) that kills the ones that only work big. Reads terse picks, riffs on
+  winners only, never relitigates a locked decision, and ends with a brand
+  toolkit and an implementation brief. Carries the taste rules that do the
+  actual work: one earned accent, tinted neutrals, surface rhythm, weight-matched
+  lockups, and no fabricated stats to fill a layout.
+
 ### Engineering
 
 - **[canon](./skills/engineering/canon/SKILL.md)** — golden's sibling for the
@@ -95,15 +119,6 @@ Pick the skills you want and which agents to install them on. That's it.
   covering both code slop and the quieter killer, context rot.
 
 ### Project Planning
-
-- **[design-space](./skills/planning/design-space/SKILL.md)** — user-invoked
-  (`/design-space`). A charrette that runs before a line of code: it grounds in
-  what already exists, lands a one-sentence thesis and three *named*
-  anti-references, names the 3–5 axes the design actually varies on, then
-  generates 4–6 mutually incompatible corners and presents them flat — no
-  ranking, because a ranked list gets the safest card picked. Ends with a
-  one-page written space: live, dead (with reasons), open, and fixed. Holds the
-  point of commitment open on purpose, and hands off to a build skill.
 
 - **[linear-method](./skills/planning/linear-method/SKILL.md)** — the
   [Linear Method](https://linear.app/method) encoded as working rules rather than

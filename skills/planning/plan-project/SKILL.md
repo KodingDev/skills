@@ -1,6 +1,9 @@
 ---
 name: plan-project
-description: Turn ideas and design docs into a sprint-ready, dependency-linked backlog — reconcile intake, break down, write tickets, sequence, assign, and shape for Jira or Linear.
+description: >
+  Turn ideas and design docs into a sprint-ready, dependency-linked
+  backlog — reconcile intake, break down, write tickets, sequence, assign,
+  and shape for Jira or Linear.
 disable-model-invocation: true
 ---
 
