@@ -64,6 +64,20 @@ Pick the skills you want and which agents to install them on. That's it.
   removal policies, construct anatomy, CDK Nag, and more. Returns a prioritized
   `file:line` report with a concrete fix per finding.
 
+- **[dotnet-profiling](./skills/engineering/dotnet-profiling/SKILL.md)** —
+  command-line profiling for .NET, organised around the question agents skip:
+  who actually reads the snapshot. `dotnet-counters`, `dotnet-trace report
+  topN`, `dotnet-gcdump report` and `dotnet-dump analyze -c` all print to
+  stdout, so they come first. dotTrace snapshots are readable — but only
+  through the MCP tools inside a running, licensed Rider, and only when
+  captured with `--profiling-type=Timeline`, because the sampling container
+  gets rejected outright. dotMemory has no agent path at all: five `dotTrace*`
+  MCP tools exist, zero `dotMemory*` ones, so a `.dmw` is for a human or for
+  nobody. Plus the traps: collects that wait forever on an Enter key nobody
+  presses, `dotnet run` child processes that swallow the attach, `TMPDIR`
+  mismatches that time out silently, snapshots that are a file *set* rather
+  than a file, and node IDs that select the wrong node if sent as JSON numbers.
+
 - **[foreman](./skills/engineering/foreman/SKILL.md)** — user-invoked
   (`/foreman`). Delivery orchestration for big multi-PR changes: one
   orchestrator agent that writes no code itself — it runs issue-tracker
