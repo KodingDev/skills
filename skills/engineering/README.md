@@ -12,4 +12,5 @@ Skills for daily code work.
 | [`lean-containers`](./lean-containers/SKILL.md) | Container image discipline for writing or reviewing Dockerfiles: slim over alpine, layer-order caching, `.dockerignore`, multi-stage builds, digest pinning. |
 | [`orchestrate`](./orchestrate/SKILL.md) | Judgment for multi-agent work: builder/critic splits, model tiering, context hygiene, deterministic pre-extraction. |
 | [`pair`](./pair/SKILL.md) | User-invoked (`/pair`). Pair-programming mode: one move per turn, narrated, keyboard handed back at a live decision point, the small things treated as the real work. |
+| [`red-team`](./red-team/SKILL.md) | User-invoked (`/red-team`). Spawn an adversary subagent (fork or fresh) that argues against a point, run a two-to-four-round bout, and return a verdict: what survived, what changed, what is still open. |
 | [`rehab`](./rehab/SKILL.md) | User-invoked (`/rehab`). Rehabilitate a sloppy AI-assisted codebase: triage, fix the map the agent reads, diet the rules file, convert prose rules into enforced checks, pay down debt behind characterization tests, hold the line. |

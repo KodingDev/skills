@@ -122,6 +122,16 @@ Pick the skills you want and which agents to install them on. That's it.
   no finish line to sprint toward: the session ends when you hand it off. Pairs
   well with manual permission mode for the full accept-each-edit feel.
 
+- **[red-team](./skills/engineering/red-team/SKILL.md)** — user-invoked
+  (`/red-team`). Argue a point out before it gets built on. The session holds
+  the position; a subagent (a fork of the session by default, a fresh agent
+  when shared context is the risk) is briefed to break it — strongest form of
+  the point only, every objection with a concrete failure scenario and
+  `file:line`, concede the instant an objection is refuted. Two to four rounds
+  on the same agent, a running ledger of refuted / conceded / open, and a
+  short verdict for you: the position as it stands now, what red won, what
+  red lost and on what evidence, what is still yours to call.
+
 - **[rehab](./skills/engineering/rehab/SKILL.md)** — user-invoked (`/rehab`).
   Rehabilitates an AI-assisted codebase that's gone sloppy, on one law:
   enforce, don't instruct. Six stages — triage what actually runs vs what's
