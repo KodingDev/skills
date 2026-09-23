@@ -89,6 +89,12 @@ Pick the skills you want and which agents to install them on. That's it.
   needs only two thin project files: a playbook of variables and a workplan
   of per-ticket briefs.
 
+- **[function-design](./skills/engineering/function-design/SKILL.md)** —
+  Logan Smith's function-design methodology made actionable: explicit dependencies
+  (controlled mutation is allowed), signatures that carry useful guarantees, and
+  one level of abstraction per body. Includes TypeScript/C# examples, invariant
+  traps, and an enforcement guide that separates hard checks from review judgment.
+
 - **[golden](./skills/engineering/golden/SKILL.md)** — build-time bias toward
   the durable version of whatever's being built. Kills the two classic failure
   modes (the converter that wraps the old mess, the speculative over-build) and

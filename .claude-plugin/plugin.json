@@ -7,6 +7,7 @@
     "./skills/engineering/cdk-best-practices",
     "./skills/engineering/dotnet-profiling",
     "./skills/engineering/foreman",
+    "./skills/engineering/function-design",
     "./skills/engineering/golden",
     "./skills/engineering/lean-containers",
     "./skills/engineering/orchestrate",
