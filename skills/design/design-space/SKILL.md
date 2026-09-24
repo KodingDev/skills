@@ -154,7 +154,7 @@ Maintain three buckets as you go: **live**, **dead** (with the reason), and **op
 
 ## Landing
 
-Write the page where the project keeps planning docs (`plans/`, `docs/`, `.meridian/specs/`).
+Write the page where the project keeps planning docs (`plans/`, `docs/`, a specs directory).
 If there is no convention, ask once. Then name what takes the page:
 
 - **A brand or identity to establish** — [`design-uplift`](../design-uplift/SKILL.md). It reads

@@ -37,7 +37,7 @@ A stage consumes the artifact of the previous stage. When the user enters direct
 ## Stage 0 — Intake & reconcile
 
 Gather the idea and each design doc, ADR, spec, or note in scope. Read them. Real formats
-that you will meet: MADR ADRs (`status / context / options / consequences`), meridian specs
+that you will meet: MADR ADRs (`status / context / options / consequences`), feature specs
 (`Overview / Requirements / …`), handover docs, and freeform brain-dumps.
 
 Reconcile them into one **work-inventory**: a flat list of the actual atoms of work. Across

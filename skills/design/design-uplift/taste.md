@@ -1,8 +1,7 @@
 # Taste rules and craft specifics
 
 The principles behind "rich and clean instead of dev UI", with the concrete
-techniques that implement them. Everything here was battle-tested against a
-real art director's reads; the priority order matters.
+techniques that implement them, in priority order.
 
 ## Color
 
@@ -30,7 +29,7 @@ real art director's reads; the priority order matters.
   at the viewBox center. An asymmetric mark centered by box rides visibly
   off-axis next to a wordmark — users notice as "the alignment is uneven".
 - **Weight-match the lockup.** The mark's stroke weight must equal the
-  wordmark's stem weight at display size. Fix EITHER side: run a matrix of
+  wordmark's stem weight at display size. Fix either side: run a matrix of
   stroke weights against the face, and of font weights against the stroke.
   Often the answer is "keep the stroke, drop the type a weight" (600 → 500).
 - **The small-size gauntlet is the law.** 20px kills: opacity tints, thin
@@ -43,7 +42,7 @@ real art director's reads; the priority order matters.
   ways at once (star + sparkle + xyz-axes). Name the readings in the toolkit.
 - **Trend check every finalist.** Sparkles read "AI product" right now; four-
   point stars read "generic magic". If the shape is trend-adjacent, the saving
-  details (uneven rays, a core dot, exact angles) ARE the identity — lock them.
+  details (uneven rays, a core dot, exact angles) are the identity — lock them.
 
 ## Type
 
@@ -83,5 +82,5 @@ real art director's reads; the priority order matters.
 - Every claim checkable: "within the hour" appears only where true. Never
   fabricate stats, testimonials, pricing, or team sections to fill a layout.
 - Internal codenames never appear publicly; speak to capability.
-- Copy IS design: a rejected-copy column ("does not sound like us") in the
+- Copy is design: a rejected-copy column ("does not sound like us") in the
   toolkit teaches the voice faster than rules do.

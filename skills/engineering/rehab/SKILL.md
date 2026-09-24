@@ -23,9 +23,9 @@ looks like, it would have written it. More exhortation is not the cure. More ver
 
 - **The map lies.** The orienting docs (CLAUDE.md, README, architecture notes) drifted. The
   agent navigates a repo that no longer exists.
-- **The rules file is over budget.** Models follow approximately 150–200 discrete
-  instructions. Compliance degrades *uniformly* as rules accumulate. Each rule that you add
-  weakens all the others. To prune is a functional change, not housekeeping.
+- **The rules file is over budget.** Every rule competes for the agent's attention with every
+  other rule and with the task. Each rule that you add weakens all the others. To prune is a
+  functional change, not housekeeping.
 - **The codebase out-shouts the docs.** The agent copies what it reads, so consistency
   heals itself and inconsistency compounds. The worst module is an instruction too.
 

@@ -5,7 +5,7 @@
 - Work in a scratchpad directory: one `explorations.html` rebuilt per pass by a
   generator script (python heredoc works well), plus a `fonts/` dir of woff2s.
 - Everything publishes as a self-contained artifact: fonts inlined as base64
-  data URIs (CSP blocks external hosts), all CSS inline. Republish the SAME
+  data URIs (CSP blocks external hosts), all CSS inline. Republish the same
   file path every pass so the URL is stable and the user can follow along on
   any device.
 - Two artifacts, two jobs: an explorations page (history, grows by appending
@@ -20,8 +20,8 @@
 2. Every mark tile shows: the mark at ~96px, a size row (32px, 20px), and a
    mini nav lockup next to the wordmark. Weak marks die at 20px — show it.
 3. When candidates get serious, add real contexts: browser tab (~15px), round
-   avatar, app icon with gradient, nav lockup, accent-colored variant. This is
-   what killed two "finalists" that looked great big.
+   avatar, app icon with gradient, nav lockup, accent-colored variant. A mark
+   that looks strong large can still fail here.
 4. Serve locally (`python3 -m http.server`), screenshot in a real browser,
    inspect the render. Common self-caught bugs: SVG groups pasted without an
    `<svg>` wrapper (renders nothing), mask id collisions between tiles (prefix
@@ -36,13 +36,13 @@
 - Terse picks ("w2, w9", "B is the winner") are the norm. Track winners across
   passes; they compound.
 - "More experimental" / "crazy stuff" = new concepts, not parameter tweaks.
-- "Keep all of that" — confirm WHICH set they mean before rebuilding; when a
+- "Keep all of that" — confirm which set they mean before rebuilding; when a
   correction arrives mid-build, recover the earlier state (the session
   transcript at ~/.claude/projects/<project>/<session>.jsonl contains every
   generator script you ran — grep it rather than reconstructing from memory).
 - A reference image or screenshot from the user outranks your read of the
   render. They see things you don't (uneven alignment, "eyes hurt").
-- When they say a thing is wrong ("still broken", "too dark"), fix in SMALL
+- When they say a thing is wrong ("still broken", "too dark"), fix in small
   steps — one variable at a time, verify, don't over-correct.
 
 ## Locking and convergence
@@ -52,7 +52,7 @@
 - The final mark ships with exact geometry (grid, ray lengths, stroke, caps,
   core, optical-centering offset) so it can be regenerated, never redrawn.
 - Toolkit sections that earn their place: the mark (geometry + clearspace +
-  min sizes + surface variants), misuse (RENDERED wrong versions with a
+  min sizes + surface variants), misuse (rendered wrong versions with a
   one-line reason each), lockup specs, color (swatches + continuous ramp
   strips + status pairs), type roles with live samples, voice do/don't with
   real example copy, surface rhythm. Skip: copy-paste code blocks (designers
