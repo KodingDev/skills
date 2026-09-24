@@ -23,7 +23,7 @@ boundary and produces the identity.
 ## The loop
 
 1. **Start from the space, not from a blank page.** Find the design space page
-   the charrette wrote (`plans/`, `docs/`, `.meridian/specs/`) and read it as
+   the charrette wrote (`plans/`, `docs/`, a specs directory) and read it as
    answered input: thesis, anti-references, axes with the user's position on
    each, live corners, and the fixed constraints no pass may violate. Do not
    re-ask what it already settled.
@@ -34,11 +34,10 @@ boundary and produces the identity.
    pin the thesis and one named anti-reference in-thread before pass one, and
    say out loud that the rest is unbounded.
 
-2. **Lock a foundation early.** Tokens (OKLCH, via better-colors), type stack
-   (better-typography), voice rules, surface rhythm. Write them down. Once the
-   user approves something, it is LOCKED: later passes build on it and never
-   silently relitigate it. Keep a running list of locked decisions in-thread.
-3. **Run numbered exploration passes** to ONE artifact URL, republished each
+2. **Lock a foundation early.** Tokens (OKLCH), type stack, voice rules,
+   surface rhythm. Write them down. Once the user approves something, it is
+   locked: later passes build on it and never silently relitigate it. Keep a running list of locked decisions in-thread.
+3. **Run numbered exploration passes** to one artifact URL, republished each
    pass so history stays linkable. Each pass is a grid of genuinely different
    options — "variants" means big swings, not tweaks, unless the user says
    otherwise. A pass covers live corners from the space; a dead corner comes
@@ -64,9 +63,9 @@ boundary and produces the identity.
 
 ## Taste rules that kill dev-UI blandness
 
-The heuristics that did the heavy lifting, in priority order — full detail and
-the craft specifics (optical centering, lockup weight-matching, ramp display)
-in [taste.md](taste.md):
+The heuristics, in priority order — full detail and the craft specifics
+(optical centering, lockup weight-matching, ramp display) in
+[taste.md](taste.md):
 
 - **One accent, earned.** A single brand color, scarce: a display period, a
   hover, the mark when it matters. Never a wash, never a panel fill.
@@ -88,6 +87,7 @@ in [taste.md](taste.md):
 ## Pairing
 
 [`design-space`](../design-space/SKILL.md) runs before this skill and hands over
-the page. Load better-colors, better-typography, and better-ui as advisory
-guidelines while building. The impeccable and hallmark skills complement this
-one for component-level polish; this skill owns the brand-level loop.
+the page. If color, typography, or UI guideline skills are installed (for
+example better-colors, better-typography, better-ui), load them as advisory
+guidelines while building. Component-level polish skills complement this one;
+this skill owns the brand-level loop.
