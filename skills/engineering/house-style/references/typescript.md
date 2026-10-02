@@ -7,7 +7,7 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 - pnpm is the package manager, with workspaces.
 - Every dependency version is `catalog:` or `workspace:*`, with no exceptions.
 - Workspace config (catalogs, overrides, patches) lives in `pnpm-workspace.yaml`.
-- Script names are plain: `build`, `build:debug`.
+- A script name is a task, then an optional variant after a colon: `build`, `build:debug`, `test:e2e`.
 - Linting is oxlint and formatting is oxfmt. Their config is the source of truth for anything mechanical.
 - A lint disable is `oxlint-disable-next-line <rule> -- <reason>`, and the reason is required. A file over `max-lines` gets split.
 - App code reads env through one typed, validated env module, and uses the env library's presets.
@@ -25,15 +25,15 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 - A closed set of values is a plain string union. When the values must be iterated, an `as const` array holds them and the union derives from it. Options and labels derive from the union.
 
   ```ts
-  export type Mode = (typeof MODES)[number];
-  export const MODES = ["cropped", "uncropped"] as const;
+  export type Status = (typeof STATUSES)[number];
+  export const STATUSES = ["draft", "published"] as const;
   ```
 
 - A schema and its type share one name, type first:
 
   ```ts
-  export type TestObject = z.infer<typeof TestObject>;
-  export const TestObject = z.object({});
+  export type User = z.infer<typeof User>;
+  export const User = z.object({});
   ```
 
 - A constant table uses `as const satisfies T`, so literal types survive. Parameters and `let` take annotations.
@@ -71,11 +71,11 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 
   ````ts
   /**
-   * Fetch every clip into one store-only zip archive.
+   * Fetch every file into one zip archive.
    *
    * @example
    * ```ts
-   * const result = await zipClips(clips, { onProgress, signal });
+   * const result = await zipFiles(files, { onProgress, signal });
    *
    * if (result.status === "done") {
    *   saveArchive(result.archive);
@@ -86,11 +86,11 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 
 ## Modules
 
-- File names are kebab-case, components included: `voice-line-navigation.tsx` exports `VoiceLineNavigation`.
+- File names are kebab-case, components included: `user-avatar.tsx` exports `UserAvatar`.
 - File suffixes: `.test.ts(x)` for tests, `.gen.ts` for generated code, `use-*.ts` for hooks.
 - A file with JSX is `.tsx`. A file without JSX is `.ts`.
 - A constant or type that belongs to one module stays in that module.
-- Import from the file that owns the symbol, through the package alias, without a `.js` extension. Barrel files do not exist.
+- Import from the file that owns the symbol, through the package alias, without a `.js` extension. The one re-export file is the `index.ts` entry point at a package boundary. Inside a package, barrel files do not exist.
 - Type imports use the inline modifier: `import { a, type B } from "x"`.
 - Import named members: `import { filter, pipe } from "remeda"`.
 - Exports are named. A framework file that requires `export default` declares the component as a named `const` first.

@@ -1,9 +1,9 @@
 ---
 name: house-style
 description: >
-  Stella's house style: the review bar that every change is written to and
-  checked against, from the shape of a change down to names, comments, and
-  commit messages. Use when writing or reviewing code, when opening or
+  The style for writing good code: the review bar that every change is
+  written to and checked against, from the shape of a change down to names,
+  comments, and commit messages. Use when writing or reviewing code, when opening or
   updating a pull request, or when the user says "house style", "my
   standards", or "nitpicks".
 ---
@@ -77,10 +77,10 @@ Language rules live in references. Read the one for each language in the diff be
 
 ## Names
 
-- A boolean variable or predicate is a question: `isPlayable`, `hasTracks`, `canDownload`. A boolean prop follows the platform: `open`, `disabled`, `checked`.
-- A count ends in `Count`: `archivedCount`, `failedCount`.
-- Event props are `onX`. The function behind one is named for the action, such as `selectSkin`.
-- A file is named for what it holds: `countdown.ts`, `brand-colors.ts`. Generic buckets (`utils`, `helpers`, `constants`, `types`) do not exist.
+- A boolean variable or predicate is a question: `isVisible`, `hasItems`, `canSubmit`. A boolean prop follows the platform: `open`, `disabled`, `checked`.
+- A count ends in `Count`: `savedCount`, `failedCount`.
+- Event props are `onX`. The function behind one is named for the action, such as `selectItem`.
+- A file is named for what it holds: `retry-policy.ts`, `date-range.ts`. Generic buckets (`utils`, `helpers`, `constants`, `types`) do not exist.
 
 ## State
 
@@ -89,7 +89,7 @@ Language rules live in references. Read the one for each language in the diff be
 
 ## Errors
 
-- Throw for bugs and broken invariants, with a custom error type and a descriptive message: `SceneValidationError`.
+- Throw for bugs and broken invariants, with a custom error type and a descriptive message: `ConfigValidationError`.
 - An expected failure that the caller must handle (cancelled, not found, rate-limited) is a returned discriminated union, written by hand.
 - A `catch` does work: it recovers, translates, or adds context.
 - A warning on a result is an error: throw, or return a typed failure.
@@ -121,7 +121,7 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Instructions are imperative: one instruction per sentence, 20 words or fewer. Descriptions use the simple present: one fact per sentence, 25 words or fewer.
 - Use the active voice and simple tenses.
 - Use `must` for a requirement and `can` for a possibility.
-- Put a condition before its command: "If the signal aborts, the archive cancels."
+- Put a condition before its command: "If the request fails, retry it once."
 - End a sentence with a period. Two thoughts are two sentences.
 - A noun cluster has three words or fewer. Break a longer one with "of", "for", or "in".
 - One item, one name. Pick one verb for check/verify/confirm/validate and one noun for config/settings.
@@ -143,7 +143,7 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 
 ## Reuse before you write
 
-- Search the codebase before you add a helper, a hook, or a dependency. Pluralizing, countdowns, date math, and asset lookups get re-implemented most often.
+- Search the codebase before you add a helper, a hook, or a dependency. Formatting, date math, timers, and lookups get re-implemented most often.
 - Data goes through the project's data layer, and reloads through it.
 - A change deletes the code it made obsolete, everywhere.
 
