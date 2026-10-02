@@ -5,8 +5,8 @@ description: >
   written to and checked against, from the shape of a change down to names,
   comments, and commit messages. Use when writing, editing, or reviewing code,
   when opening or updating a pull request, when doing UI work, or when the user
-  says "house style", "standards", "nitpicks", "behave", "no slop", "stop the
-  slop", or "too many comments".
+  says "house style", "standards", "nitpicks", "behave", or "too many
+  comments".
 ---
 
 # House style
@@ -31,9 +31,6 @@ Language rules live in references. Read the one for each language in the diff be
 - A change reworks the code it touches into its intended shape, even when the diff grows.
 - A cleanup of existing code goes in its own commit, on the same pull request.
 - Where this style is silent, pick the plain shape.
-- Treat your own output as suspect. Before you present a finding, check each claim that you cannot defend. A claim from one source is "leaning toward", never "verified".
-- Evaluate a suggested approach on its merits, the user's included. When it has a flaw, say so with concrete evidence, give a recommendation, and ask once. After the decision, implement the chosen path in full.
-- Confirm before any destructive or irreversible action: deleting files or code, reverting work, resetting, force-pushing, dropping data.
 
 ## Prior art
 
@@ -131,8 +128,7 @@ Code is traceable: from the logs alone, a reader can follow one request or job f
 - A merged change has no TODOs.
 - A comment names no environment or session detail, such as a production URL or a local machine.
 - A cleanup keeps the useful comments that already exist: layout diagrams and real nuance.
-- When you edit a file, remove the comment slop in the code you touch: narration, banners, change logs.
-- Generic code names no domain. A shared module or a generic tool mentions no product, game, or customer.
+- When you edit a file, bring the comments in the code you touch up to these rules: remove narration, banners, and change logs.
 - Reasoning that the user needs goes in the chat response.
 - A line comment lives inside a function body. A top-level declaration that needs a comment gets a doc comment.
 - A section inside a body can carry one line comment, multiline if needed, when its first line does not show its purpose. The comment gives the reason, never a heading that repeats the code.
