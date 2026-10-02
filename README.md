@@ -4,179 +4,69 @@
 
 [![skills.sh](https://skills.sh/b/KodingDev/skills)](https://skills.sh/KodingDev/skills) · [MIT](./LICENSE)
 
-Agent skills I actually use to get real work done with coding agents — not vibe
-coding. Each one is a single folder: a `SKILL.md` and whatever files it needs.
-No runtime, no config, nothing to wire up.
+The agent skills I use for daily work with coding agents. Each skill is one folder: a `SKILL.md` and the files it reads. There is no runtime and no config.
 
-They follow the [skills.sh](https://skills.sh) format, so they run in Claude
-Code, pi, and anything else that speaks Agent Skills. Small, easy to adapt,
-composable, and model-agnostic. Fork them, tweak them, make them yours.
+The skills use the [skills.sh](https://skills.sh) format, so they run in Claude Code, pi, and any other agent that reads Agent Skills. Fork them and change them to fit your work.
 
-## Quickstart
+## Install
 
 ```bash
 npx skills@latest add KodingDev/skills
 ```
 
-Pick the skills you want and which agents to install them on. That's it.
+Pick the skills and the agents to install them on.
 
-## What's inside
+## Skills
 
-### Design
-
-- **[design-space](./skills/design/design-space/SKILL.md)** — user-invoked
-  (`/design-space`). A charrette that runs before a line of code: it grounds in
-  what already exists, lands a one-sentence thesis and three *named*
-  anti-references, names the 3–5 axes the design actually varies on, then
-  generates 4–6 mutually incompatible corners and presents them flat — no
-  ranking, because a ranked list gets the safest card picked. Ends with a
-  one-page written space: live, dead (with reasons), open, and fixed. Holds the
-  point of commitment open on purpose, then hands the page to `design-uplift`.
-
-- **[design-uplift](./skills/design/design-uplift/SKILL.md)** — the build half
-  of that pair, and the loop that turns "functional but bland" into
-  "unmistakably theirs". It reads the space page as answered input, locks a
-  foundation (OKLCH tokens, type stack, voice, surface rhythm), then runs
-  numbered exploration passes to one republished artifact — big swings, not
-  tweaks — screenshot-verifying every pass before the user sees it and putting
-  marks through the small-size gauntlet (96/32/20px, browser tab, avatar, app
-  icon) that kills the ones that only work big. Reads terse picks, riffs on
-  winners only, never relitigates a locked decision, and ends with a brand
-  toolkit and an implementation brief. Carries the taste rules that do the
-  actual work: one earned accent, tinted neutrals, surface rhythm, weight-matched
-  lockups, and no fabricated stats to fill a layout.
+Skills marked **`/name`** are user-invoked: they run only when you type the name. The agent reaches every other skill on its own when the task matches.
 
 ### Engineering
 
-- **[canon](./skills/engineering/canon/SKILL.md)** — golden's sibling for the
-  understanding stage: porting a decompiled reference, reading a library or
-  serialized format from the outside, chasing a regression. The record is
-  canon; a story about what the system might do is headcanon. Four-part creed
-  — it is deterministic, there is always a pointer, there is always a source,
-  and it was built the smart generic way — plus a smell catalog for headcanon
-  (constructed paths, invented taxonomies, invented corrections, downstream
-  patches, bespoke subsystems, accumulating cutouts) and the loop that
-  replaces each with a traced, source-cited fix.
+How the code gets built and reviewed.
 
-- **[cdk-best-practices](./skills/engineering/cdk-best-practices/SKILL.md)** —
-  point it at AWS CDK code (a file, a construct, a whole package) and it audits
-  against a 27-rule catalog: least-privilege grants, broad IAM, hardcoded names,
-  removal policies, construct anatomy, CDK Nag, and more. Returns a prioritized
-  `file:line` report with a concrete fix per finding.
+| Skill | What it does |
+| --- | --- |
+| [golden](./skills/engineering/golden/SKILL.md) | Builds the durable version of anything new, exactly as simple as the problem. Also the review lens for shape: no converters, no over-build, variation as data. |
+| [canon](./skills/engineering/canon/SKILL.md) | Golden's sibling for studying a system: a port, a library, a bug. The system is deterministic, there is always a pointer and a source, and every fix cites it. |
+| [function-design](./skills/engineering/function-design/SKILL.md) | Designs and reviews single functions for honest dependencies, a useful signature, and one level of abstraction. TypeScript and C# examples. |
+| [house-style](./skills/engineering/house-style/SKILL.md) | The style for writing good code, as the review bar for every change: names, control flow, errors, comments, STE writing, tests, and git, with TypeScript and React references. Builds on golden, canon, and function-design. |
+| [lean-containers](./skills/engineering/lean-containers/SKILL.md) | Dockerfile discipline: slim over alpine, layer order as the cache strategy, `.dockerignore`, multi-stage builds, pinned digests. |
+| [cdk-best-practices](./skills/engineering/cdk-best-practices/SKILL.md) | Audits AWS CDK code against a 27-rule catalog and returns a prioritized `file:line` report with a fix per finding. |
+| [dotnet-profiling](./skills/engineering/dotnet-profiling/SKILL.md) | .NET profiling routed by who can read the output: the `dotnet-*` tools first, dotTrace through Rider's MCP tools, and the traps that make collects hang. |
 
-- **[dotnet-profiling](./skills/engineering/dotnet-profiling/SKILL.md)** —
-  command-line profiling for .NET, organised around the question agents skip:
-  who actually reads the snapshot. `dotnet-counters`, `dotnet-trace report
-  topN`, `dotnet-gcdump report` and `dotnet-dump analyze -c` all print to
-  stdout, so they come first. dotTrace snapshots are readable — but only
-  through the MCP tools inside a running, licensed Rider, and only when
-  captured with `--profiling-type=Timeline`, because the sampling container
-  gets rejected outright. dotMemory has no agent path at all: five `dotTrace*`
-  MCP tools exist, zero `dotMemory*` ones, so a `.dmw` is for a human or for
-  nobody. Plus the traps: collects that wait forever on an Enter key nobody
-  presses, `dotnet run` child processes that swallow the attach, `TMPDIR`
-  mismatches that time out silently, snapshots that are a file *set* rather
-  than a file, and node IDs that select the wrong node if sent as JSON numbers.
+### Working with agents
 
-- **[foreman](./skills/engineering/foreman/SKILL.md)** — user-invoked
-  (`/foreman`). Delivery orchestration for big multi-PR changes: one
-  orchestrator agent that writes no code itself — it runs issue-tracker
-  tickets, cuts a fresh worktree per ticket, briefs workers, self-reviews,
-  and puts one human-reviewable PR per ticket per repo in front of you. No stacked
-  PRs, every line reviewed, velocity from concurrency across disjoint
-  file-scope lanes. The invariants (the loop, brief template, PR
-  conventions, stop-and-ask discipline) live in the skill, so a new program
-  needs only two thin project files: a playbook of variables and a workplan
-  of per-ticket briefs.
+How the sessions run.
 
-- **[function-design](./skills/engineering/function-design/SKILL.md)** —
-  Logan Smith's function-design methodology made actionable: explicit dependencies
-  (controlled mutation is allowed), signatures that carry useful guarantees, and
-  one level of abstraction per body. Includes TypeScript/C# examples, invariant
-  traps, and an enforcement guide that separates hard checks from review judgment.
+| Skill | What it does |
+| --- | --- |
+| [**`/pair`**](./skills/engineering/pair/SKILL.md) | Pair-programming mode. One move per turn, forks talked through before typing, and the keyboard back to you at each decision. |
+| [**`/red-team`**](./skills/engineering/red-team/SKILL.md) | A subagent argues against a point for two to four rounds. You get a verdict: what survived, what changed, what is still open. |
+| [**`/foreman`**](./skills/engineering/foreman/SKILL.md) | Delivery for big changes: tickets, a worktree per ticket, worker fan-out, and one reviewable PR per ticket per repo. |
+| [**`/rehab`**](./skills/engineering/rehab/SKILL.md) | Rehabilitates a sloppy AI-assisted codebase: fix the docs the agent reads, cut the rules file, and turn prose rules into checks. |
+| [orchestrate](./skills/engineering/orchestrate/SKILL.md) | Judgment for multi-agent work: separate builders from critics, cheap models compile and expensive models judge, tools shrink the corpus first. |
 
-- **[golden](./skills/engineering/golden/SKILL.md)** — build-time bias toward
-  the durable version of whatever's being built. Kills the two classic failure
-  modes (the converter that wraps the old mess, the speculative over-build) and
-  holds the bar: one source of truth, nothing special, schema-first contracts,
-  boundaries that hold, composable pieces, damn simple, zero comment
-  narration, scarce tests, precise signatures and doc comments on public
-  surfaces, a DX pass to finish. Golden from the start instead of
-  audit-and-refactor later, and the same bar as a review lens.
+### Design
 
-- **[lean-containers](./skills/engineering/lean-containers/SKILL.md)** — the
-  five rules that cover ~90% of container quality, applied whenever a
-  Dockerfile is written or reviewed: slim over alpine (musl recompiles what
-  glibc just installs), layer order as the cache strategy (peel the onion —
-  manifests, install, then source), `.dockerignore` instead of surgical
-  COPYs, builder stage as the bloat zone with scratch/distroless finals, and
-  digests pinned over movable tags. Plus the honest escape hatch: one process
-  per container is a vibe, not a law.
+| Skill | What it does |
+| --- | --- |
+| [**`/design-space`**](./skills/design/design-space/SKILL.md) | A charrette before any code: a thesis, named anti-references, the real design axes, and 4–6 incompatible directions, presented unranked. |
+| [design-uplift](./skills/design/design-uplift/SKILL.md) | Turns a bland product into an identity: a locked foundation, numbered exploration passes, screenshot checks at every size, and a brand toolkit at the end. |
 
-- **[orchestrate](./skills/engineering/orchestrate/SKILL.md)** — judgment for
-  multi-agent work: builders and critics never share incentives or context,
-  cheap models compile while expensive models judge (and one brain reads the
-  result), facts go in and verdicts come out, and deterministic tools shrink
-  the corpus before any agent reads a byte.
+### Planning
 
-- **[pair](./skills/engineering/pair/SKILL.md)** — user-invoked (`/pair`).
-  Pair-programming mode: the agent stops being a contractor that returns with
-  a diff and becomes the colleague in the next chair. One move per turn — an
-  edit, a rename, an opinion about a fork — then the keyboard comes back to
-  you at a live decision point. Forks get talked through before typing, small
-  things (names, seams, boundaries) are treated as the real work, and there's
-  no finish line to sprint toward: the session ends when you hand it off. Pairs
-  well with manual permission mode for the full accept-each-edit feel.
+| Skill | What it does |
+| --- | --- |
+| [linear-method](./skills/planning/linear-method/SKILL.md) | The [Linear Method](https://linear.app/method) as working rules: initiatives, enablers and blockers, 1–3 week projects, issues over user stories, cycles, launches. |
+| [**`/plan-project`**](./skills/planning/plan-project/SKILL.md) | Turns ideas and design docs into a review-ready backlog of vertical-slice tickets, sequenced by dependency, for Jira or Linear. |
 
-- **[red-team](./skills/engineering/red-team/SKILL.md)** — user-invoked
-  (`/red-team`). Argue a point out before it gets built on. The session holds
-  the position; a subagent (a fork of the session by default, a fresh agent
-  when shared context is the risk) is briefed to break it — strongest form of
-  the point only, every objection with a concrete failure scenario and
-  `file:line`, concede the instant an objection is refuted. Two to four rounds
-  on the same agent, a running ledger of refuted / conceded / open, and a
-  short verdict for you: the position as it stands now, what red won, what
-  red lost and on what evidence, what is still yours to call.
+## Add a skill
 
-- **[rehab](./skills/engineering/rehab/SKILL.md)** — user-invoked (`/rehab`).
-  Rehabilitates an AI-assisted codebase that's gone sloppy, on one law:
-  enforce, don't instruct. Six stages — triage what actually runs vs what's
-  decoration, fix the map the agent reads (stale docs are why it "won't
-  listen"), put the rules file on a ~300-word diet, convert every prose rule
-  into a check that fails inside the agent's own loop, pay down the worst
-  debt behind characterization tests, and close the loop so caught
-  anti-patterns become law the same day. Ships a symptom → check catalog
-  covering both code slop and the quieter killer, context rot.
-
-### Project Planning
-
-- **[linear-method](./skills/planning/linear-method/SKILL.md)** — the
-  [Linear Method](https://linear.app/method) encoded as working rules rather than
-  background reading. Momentum is the thing being protected: initiatives that a
-  team can decide against without asking, goals derived backwards from the rung
-  before them, every priority call labelled enabler or blocker with a
-  now-or-later answer, projects that ship in 1–3 weeks with 1–3 people or get
-  staged until they do, issues that name a task instead of user stories,
-  two-week cycles that mix feature and quality work, design projects staged
-  rather than estimated, and launch-and-keep-launching over one dated moment.
-  Branches into `direction.md` (what to build) and `building.md` (doing it).
-
-- **[plan-project](./skills/planning/plan-project/SKILL.md)** — user-invoked
-  (`/plan-project`). Takes a project from "I have ideas" — plus any design docs
-  or ADRs — to a review-ready backlog: it reconciles messy intake, breaks the
-  work into vertical-slice tickets, writes them to a mini-PRD quality bar,
-  sequences them by real dependencies, assigns by capacity, and shapes the
-  result for Jira or Linear. Codebase-aware; produces markdown, never live writes.
-
-## Adding a skill
-
-Drop a folder under a bucket, write `SKILL.md`, then register it in the README,
-its bucket README, and `plugin.json`. Conventions live in
-[`CLAUDE.md`](./CLAUDE.md).
+Put a folder under a bucket and write its `SKILL.md`. Then add it to this README, to the bucket README, and to `plugin.json`. [`CLAUDE.md`](./CLAUDE.md) holds the conventions.
 
 ```
-skills/<bucket>/<skill>/SKILL.md   the skill, plus any support files it reads
-.claude-plugin/plugin.json         manifest skills.sh installs from
+skills/<bucket>/<skill>/SKILL.md   the skill, plus the files it reads
+.claude-plugin/plugin.json         the manifest that skills.sh installs from
 ```
 
 MIT © Stella Inwood

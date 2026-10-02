@@ -43,7 +43,7 @@ for each rule. Read it before you audit. The workflow and the rule index are bel
      constructs, CfnParameter for configuration, stacks as the modeling unit, missing tests,
      no CDK Nag, deploy-time decisions.
    - **Low** — a style or convention problem. Examples: wildcard imports, missing JSDoc,
-     snapshot-only tests.
+     template snapshot tests.
 
 5. **Report.** Group the findings by severity. For each finding, give the `file:line`, the
    rule name, what you found, one line on why it is important, and the fix. If the code
@@ -83,7 +83,7 @@ the code to confirm each hit.
 | 18 | Co-locate infrastructure + runtime code (`Code.fromAsset` local path) | Low | `Code.fromAsset` |
 | 19 | Evaluate third-party constructs before adoption | Low | non-`aws-cdk-lib`/`@cdklabs` construct deps in `package.json` |
 | 20 | Fine-grained assertion tests exist (`aws-cdk-lib/assertions`, `Template.fromStack`) | Medium | presence of `test/`, `Template.fromStack` |
-| 21 | No snapshot-only testing (`toMatchSnapshot`) | Low | `toMatchSnapshot` without `hasResourceProperties` |
+| 21 | No template snapshot tests (`toMatchSnapshot`) | Low | any `toMatchSnapshot` on a synthesized template |
 | 22 | Testing hygiene: assert that stateful logical IDs stay stable; no synth-time lookups | Medium | tests that reference logical IDs; `beforeEach` |
 | 23 | CDK Nag wired in (`AwsSolutionsChecks` via `Aspects.of`) | Medium | `cdk-nag\|AwsSolutionsChecks` |
 | 24 | CDK Nag suppressions have a `reason` and a narrow scope (resource > stack) | Medium | `NagSuppressions` with/without `reason:` |
