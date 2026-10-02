@@ -50,6 +50,9 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 
 - A function that can find nothing returns `T | null`. `undefined` means "not provided": optional parameters and optional props (`?:`).
 - A value that cannot be missing is used directly, without `|| undefined`, `?? ""`, or a polyfill for a platform API.
+- Time uses Temporal, with a polyfill until every target runtime ships it. The polyfill loads once, at the app entry.
+- Pick the Temporal type for the meaning: `Instant` for a moment, `PlainDate` for a calendar date, `ZonedDateTime` for a moment in a place. `Date` stays at the edges where a library requires it.
+- A timestamp crosses a boundary as a UTC ISO 8601 string. Code converts to local time only for display.
 - A guard runs once, in the function that owns it.
 - Data crosses a boundary through a Zod schema: a registry, a config, a param shape.
 - A module-level `const` that is not a function, a component, or a schema is SCREAMING_SNAKE: tunables, tables, value arrays.
