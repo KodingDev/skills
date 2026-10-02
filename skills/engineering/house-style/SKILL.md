@@ -23,6 +23,7 @@ Language rules live in references. Read the one for each language in the diff be
 
 - TypeScript and JavaScript: [`references/typescript.md`](references/typescript.md).
 - React and UI code: [`references/react.md`](references/react.md), with the TypeScript file.
+- Python: [`references/python.md`](references/python.md).
 
 ## Authority
 
@@ -199,6 +200,12 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Keep a list of what you tried and ruled out. Never repeat an attempt that already failed.
 - When a fix gets "still broken" or "same error", the fix was wrong. Stop patching, and go back to the root cause.
 - For an environment problem (a stale dev server, a cache, a hot reload that missed), apply the operational fix: restart, clear, rebuild. Code stays as it is.
+
+## Toolchain
+
+- `mise.toml` pins every runtime and tool version for the repo: Node, pnpm, Python, uv, and the rest. It is the one source of those versions.
+- Per-tool version pins (`.nvmrc`, `.node-version`, `.python-version`, `.tool-versions`, the `packageManager` field in `package.json`) do not exist.
+- CI installs the toolchain through mise, so local and CI run the same versions on every platform.
 
 ## Generated code
 
