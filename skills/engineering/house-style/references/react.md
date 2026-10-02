@@ -64,7 +64,7 @@ Read this file with `SKILL.md` and `typescript.md` before you write or review a 
 - The project's design guidelines win: its design doc, its brand page.
 - Section headings read clearly different from field labels.
 - Numbered section badges ("01", "02", "03"), a monospace font with no job, and generic three-card layouts are AI tells. Each design element has a reason from the content.
-- "Redesign it" means design from nothing. A reskin of the old page is not a redesign.
+- "Redesign it" means design from nothing, as if no page existed before.
 
 ## Accessibility
 
