@@ -71,7 +71,7 @@ Compose each interface from the user's task, then fill it with components. Niels
 - Fewer choices are faster. Give a good default, and ask only for what the system cannot infer.
 - Keep the user in context. Edit in place, and use a modal only for a decision that must block the flow.
 - Every action gives feedback within 100 ms: a pressed state, an optimistic update, or a progress indicator.
-- Design every state of a view, not only the full one: empty, loading, partial, error, and overflowing content. An empty state says what goes there and how to add it.
+- Design every state of a view: full, empty, loading, partial, error, and overflowing content. An empty state says what goes there and how to add it.
 - Make the system state visible: what is selected, what is saved, and what is still running.
 - Prefer recognition to recall. Show the options, the current values, and the recent items.
 - Keep one spacing rhythm, from the design system's scale. Alignment lines run through the whole view.
