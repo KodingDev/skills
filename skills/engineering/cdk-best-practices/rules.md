@@ -178,9 +178,10 @@ template.resourceCountIs('AWS::DynamoDB::Table', 1);
 template.hasResource('AWS::DynamoDB::Table', { DeletionPolicy: 'Retain' });
 ```
 
-### 21. Snapshot tests are supplementary
-`expect(template.toJSON()).toMatchSnapshot()` is useful for refactor confidence but brittle (CDK upgrades,
-context, metadata cause false failures). Don't rely on snapshots as the only tests.
+### 21. No template snapshots
+Tests assert with fine-grained assertions only. A template snapshot (`toMatchSnapshot()` on `template.toJSON()`)
+is brittle: CDK upgrades, context, and metadata change it with no real change. Nobody reads its diff in review.
+For refactor confidence, run `cdk diff` in CI.
 
 ### 22. Testing hygiene
 Refactor setup into `beforeEach`/helpers (no copy-paste); descriptive test names; one behavior per test;
