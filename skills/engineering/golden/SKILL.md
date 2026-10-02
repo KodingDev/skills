@@ -12,7 +12,7 @@ description: >
 
 Architecture audits repair codebases that were built badly. This skill is the other half.
 When you build, build the version that never needs the audit. Make it golden from the start.
-Make it exactly as simple as the shape of the problem — not more simple, and not more grand.
+Make it exactly as simple as the shape of the problem: not more simple, and not more grand.
 
 Two failure modes kill more codebases than bugs do. Prevent both:
 
@@ -24,7 +24,7 @@ Two failure modes kill more codebases than bugs do. Prevent both:
   tombstones, no 1:1 port of a shape nobody wants, unless the user asks for compatibility.
   Replace and delete; history keeps the old shape.
 - **The over-build.** Speculative generality, configuration that nobody asked for, a
-  framework where a function is sufficient. If the user asks for a dump, give a dump — not a
+  framework where a function is sufficient. If the user asks for a dump, give a dump, not a
   pipeline that parses and audits the dump. Deliver the shape of this problem, not the shape
   of each problem that it makes you think of.
 
@@ -41,12 +41,12 @@ format. Before you add a new kind, type, or flag with its own logic, ask what ge
 it is. The special part is usually data (a name, a threshold, a table entry), not a type with
 its own machinery.
 
-**Boundaries hold.** A generic layer — engine, core, shared — carries no domain vocabulary,
+**Boundaries hold.** A generic layer (engine, core, shared) carries no domain vocabulary,
 in identifiers, comments, or branches. A product name in a shared module is a special case
 wearing a name. The generic layer exposes a hook or a data slot; the domain fills it from
 its own package.
 
-**Schema-first contracts.** Define each data shape once — as a schema, type, dataclass, or
+**Schema-first contracts.** Define each data shape once, as a schema, type, dataclass, or
 proto, whatever the stack offers. Derive the validation, the parsing, and the defaults from
 that definition. A hand-written check beside a shape definition is the same contract written
 two times, and worse.
@@ -61,12 +61,12 @@ delete? A carve-out too specific to generalize is debt at birth.
 
 **Public surfaces get real contracts.** Give exported APIs precise signatures: named options,
 enumerated variants, no stringly-typed grab bags. Give them real doc comments (TSDoc,
-docstring, rustdoc — whatever the language uses): what the API does, its parameters, and the
+docstring, rustdoc, whatever the language uses): what the API does, its parameters, and the
 constraint that is not obvious. This documents a contract. It does not narrate.
 
 **No narration in the code.** Internals get zero comments by default. A comment earns its
 place only when it states a *why* that is not obvious: a hidden constraint, or a workaround
-for a specific bug. One line is the maximum. Delete everything else — what the next line
+for a specific bug. One line is the maximum. Delete everything else: what the next line
 does, the plan, what changed, an essay above a statement. That text is chain-of-thought that
 leaked into the file. Reasoning lives in the chat and in the PR conversation. The code stays
 clean. Section banners, change-log comments, and notes git history already holds are
@@ -90,7 +90,7 @@ report-only.
 ## Contrast
 
 Each case bespoke: each alert channel has grown its own delivery path, its own retry scheme,
-and its own bookkeeping. One channel quietly hides a routing policy. The next channel will
+and its own bookkeeping. One channel hides a routing policy. The next channel will
 grow all four again:
 
 ```ts

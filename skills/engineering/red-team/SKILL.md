@@ -93,7 +93,7 @@ Blue writes the verdict for the user. Short, and it stands on its own:
   changed, say what it was and what it became.
 - **What red won.** Each conceded objection and the change it forced.
 - **What red lost.** The strongest refuted objection and the evidence that refuted it. One
-  line each; the user needs to know the point was actually tested.
+  line each; the user needs to know the point was tested.
 - **Still open.** Anything that neither side could settle from the repo. This is where the
   user's call lives.
 - **Recommendation.** What blue would do now, and why.

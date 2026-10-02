@@ -1,10 +1,10 @@
 ---
 name: design-space
 description: >
-  A conversational charrette that ends in a written design space — thesis,
-  anti-references, axes, and competing corners — before any code, comp, or
-  palette exists. Conversation only, no renders, no variants; the written page
-  is the whole output, and a build skill executes against it.
+  A conversational charrette that ends in a written design space: thesis,
+  anti-references, axes, and competing corners. It runs before any code, comp,
+  or palette exists. It is conversation only, with no renders and no variants.
+  The written page is the whole output, and a build skill executes against it.
 disable-model-invocation: true
 ---
 
@@ -14,10 +14,10 @@ A **charrette**: one conversation that ends with a bounded design *space*, not a
 code, no comp, no prototype, no palette. The output is a short written page that a build
 skill picks up and executes against.
 
-This skill exists to stop one failure: the agent hears the request, silently picks the first
+This skill stops one failure: the agent hears the request, silently picks the first
 coherent design, and builds it well. What ships is fine. But nobody chose it. Nobody saw the
 three better ideas that died unnamed in the first thirty seconds. So the charrette spends its
-whole run **before the point of commitment**. Its discipline is to hold that point open
+whole run **before the point of commitment**. Its discipline: hold that point open
 longer than is comfortable.
 
 You are the studio. The user is the art director. You generate. They choose. Never both.
@@ -40,14 +40,14 @@ Everything below is a way to fill one of its fields, not a stage in a sequence.
 
 **Dead.** <corner name> - killed because <reason>.
 
-**Open.** <decision deliberately deferred, and what will settle it>
+**Open.** <decision deferred on purpose, and what will settle it>
 
 **Fixed.** <constraints the ground gave that no build may violate>
 ```
 
 A charrette loops and doubles back. A user who opens with a concrete complaint about two
 specific screens has handed you a corner before anyone named an axis. Take it and work
-backwards. Fill the field that the conversation just made available. Keep the other fields
+backwards. Fill the field that the conversation made available. Keep the other fields
 visible as holes.
 
 ## The rules of the room
@@ -55,13 +55,13 @@ visible as holes.
 1. **Facts you look up, decisions you ask.** Find everything in the repo, the docs, or the
    live product yourself. Never spend a question on it. What the thing must *be* is theirs.
    Nothing is true because it is plausible. Each claim about the product, the users, or the
-   code cites the file and line that it came from. An invented user need quietly steers each
-   axis.
+   code cites the file and line that it came from. An invented user need steers each axis
+   without notice.
 2. **Ask through the structured question tool, one decision at a time.** Send discrete
    answers through the tool, not a paragraph. Options are faster to answer, and the answer is
    unambiguous. Ask one decision per round, then stop. The tool caps at four options, so a
    set of five or six takes two rounds. Never truncate a list to fit. An option that the user
-   never sees reads the same as an option that you never generated. Freeform is correct only
+   never sees reads the same as an option that you never generated. Use freeform only
    when the answer is a sentence that you cannot enumerate: the thesis, a name, "what is
    this for".
 3. **Recommend on decisions, never on options.** A decision ("who is this for?") deserves
@@ -85,8 +85,8 @@ docs, the live product, the sibling products, and the prior art that the user na
 named a reference ("something like Linear"), look at it. Then you can state in one sentence
 what exists today and what is missing. Source each claim to something that you read.
 
-Say in one line which fork you are in. **Greenfield** — nothing to preserve, the whole space
-is open. **Incumbent** — something exists. Name what is *fixed* (product truth, brand
+Say in one line which fork you are in. **Greenfield**: nothing to preserve, and the whole space
+is open. **Incumbent**: something exists. Name what is *fixed* (product truth, brand
 commitments, platform, what the user already locked) and what is in play. That list is the
 **Fixed** field of the page. The incumbent design is evidence of what the thing is, never
 authority over what it becomes.
@@ -124,7 +124,7 @@ you generate or present a set. Both orders are legitimate:
 
 - **Concept first, axis extracted.** The user hands you something concrete: a complaint about
   two specific panels, a screen that they love, a reference. That is already a corner. Name
-  what it differs from, and the axis falls out — in their vocabulary, with evidence behind
+  what it differs from, and the axis falls out, in their vocabulary and with evidence behind
   it. Use this order when anything concrete is on the table. The axis that it yields beats
   any axis that you derive cold.
 - **Axis first, corners pinned.** Nothing concrete exists yet, or the concepts that come back
@@ -132,8 +132,7 @@ you generate or present a set. Both orders are legitimate:
   corners at their ends. That guarantees that the corners in the set differ.
 
 Expect to alternate. An extracted axis suggests a corner that nobody would have pitched. A
-pinned
-corner shows a dimension that nobody had named. The space is bounded when 3-5 axes hold, when
+pinned corner shows a dimension that nobody had named. The space is bounded when 3-5 axes hold, when
 at least two corners are mutually exclusive (to build one forecloses the other), and when the
 cost of each corner names something specific that it gives up: a user that it fails, a use
 that it cannot host, a constraint that it breaks. "More work" and "less flexible" are not
@@ -145,8 +144,8 @@ The user reacts. Their reaction is data, not instruction. "Too cold" marks a pos
 axis. It does not name the design. Play it back as a coordinate ("so: warm end of register,
 but the density stays high?") and confirm.
 
-Mark the set with a multi-select question round — "which of these stay live?" — listed in the
-order of presentation. Multi-select keeps this from a collapse into a vote. The user draws a
+Mark the set with a multi-select question round ("which of these stay live?"). List the corners in the
+order of presentation. Multi-select keeps this from becoming a vote. The user draws a
 boundary around a region. They do not pick a winner.
 
 Maintain three buckets as you go: **live**, **dead** (with the reason), and **open**
@@ -157,17 +156,17 @@ Maintain three buckets as you go: **live**, **dead** (with the reason), and **op
 Write the page where the project keeps planning docs (`plans/`, `docs/`, a specs directory).
 If there is no convention, ask once. Then name what takes the page:
 
-- **A brand or identity to establish** — [`design-uplift`](../design-uplift/SKILL.md). It reads
+- **A brand or identity to establish**: [`design-uplift`](../design-uplift/SKILL.md). It reads
   this page as its ground, then runs the exploration passes the charrette refused to run.
-- **A corner that must be felt before it can be judged** — a throwaway prototype of that one
+- **A corner that must be felt before it can be judged**: a throwaway prototype of that one
   corner, then back here to mark it.
-- **The space settled and the work needing breakdown** — a planning pass.
+- **The space is settled and the work needs breakdown**: a planning pass.
 
 The page **replaces** the discovery round of the next step. It does not precede it. Hand the
-page over as answered input — audience, job, tone, constraints, and what was already ruled
-out — so that nobody sits through those questions a second time.
+page over as answered input (audience, job, tone, constraints, and what was already ruled
+out), so that nobody sits through those questions a second time.
 
 **Done when:** the page exists on disk, the user has confirmed it, and the next step is named
-with an owner — not "we could now build it". Each generated corner appears on the page under
+with an owner, not "we could now build it". Each generated corner appears on the page under
 live, dead, or open. A corner that vanishes silently comes back in three weeks under a
 different name.

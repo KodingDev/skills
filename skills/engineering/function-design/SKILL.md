@@ -28,8 +28,8 @@ explicitly supplied stateful PRNG are honest. Do not impose purity by accident.
 - Trace reads and writes through callees, callbacks, getters, and imported helpers.
   A clock, singleton, environment read, or global RNG hidden one call deep is
   still hidden. `const` does not make an object immutable.
-- Aim for functional core, imperative shell. Pass a time value or config snapshot
-  when that is enough; inject a narrow capability when the operation must interact.
+- Use a functional core and an imperative shell. Pass a time value or config snapshot
+  when that is enough. Inject a narrow capability when the operation must interact.
 - Keep framework hooks as thin adapters over ordinary functions.
 - Separate computing a result from acting on it. When the result is expensive to
   materialize, return an iterator or take a caller-supplied consumer.
@@ -51,7 +51,7 @@ inputs, meaningful outcomes, and important preconditions without reading the bod
 - Represent meaningful failure in the project's error convention. Keep "missing"
   distinct from "no" when callers care. Never terminate the process from a lookup.
 - Use typestate or a receipt to encode required ordering. The receipt must prove the
-  right object in its current state, not merely that a call happened once.
+  right object in its current state, not only that a call happened once.
 - Add a type for a real misuse risk, not for every conceivable precondition.
 
 Read [examples.md](references/examples.md) before encoding an invariant in a type.
@@ -77,7 +77,7 @@ outline with the body. Each operation is a peer at the level the name promises.
 Write each material finding in this shape:
 
 <template>
-**`path:line` — <short name>**
+**`path:line` -- <short name>**
 Gap: <hidden dependency, contract gap, or level mix>
 Cost: <concrete failure or change scenario it causes>
 Fix: <smallest useful correction>

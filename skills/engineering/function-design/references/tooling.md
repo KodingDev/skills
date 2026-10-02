@@ -1,8 +1,8 @@
 # Enforcement in TypeScript and C#
 
-Use this reference when asked to enforce the methodology. Inspect existing checks
-first and extend them where practical. Verify current tool documentation and installed
-versions before configuring rules; these are candidates, not a required tool stack.
+Use this reference when the user asks to enforce the methodology. Inspect the existing
+checks first and extend them where you can. Check the current tool docs and installed
+versions before you configure rules. These tools are candidates, not a required stack.
 
 ## Match the guarantee to the mechanism
 
@@ -15,18 +15,18 @@ versions before configuring rules; these are candidates, not a required tool sta
 | Complex control flow gets reviewed | Cognitive complexity, depth and parameter-count checks | SonarAnalyzer.CSharp and existing analyzer rules | Metrics do not measure semantic abstraction or responsibility. |
 
 Make enforceable architectural violations build failures where requested. Treat
-heuristics as review signals rather than pretending they prove the design. Do not
+heuristics as review signals. They do not prove the design. Do not
 silently replace a project's warning/error policy or lower existing validation.
 
 ## TypeScript
 
 - [ESLint restricted properties](https://eslint.org/docs/latest/rules/no-restricted-properties):
   disallow direct `Date.now` and `Math.random` access in selected core files. Add
-  appropriate restrictions for zero-argument `new Date()`, `fetch`, environment
-  access, and project stores; a single property rule does not cover these all.
+  restrictions for zero-argument `new Date()`, `fetch`, environment
+  access, and project stores; one property rule does not cover all of them.
 - [dependency-cruiser](https://github.com/sverweij/dependency-cruiser): validate
   dependency direction and cycles. Include relevant adapters and external modules
-  in the policy rather than banning only one filesystem import spelling.
+  in the policy in place of a ban on one filesystem import spelling.
 - [typescript-eslint readonly parameters](https://typescript-eslint.io/rules/prefer-readonly-parameter-types/)
   and [eslint-plugin-functional](https://github.com/eslint-functional/eslint-plugin-functional):
   selectively useful for read-only APIs. Blanket no-mutation/no-loop/no-class presets
@@ -36,7 +36,7 @@ silently replace a project's warning/error policy or lower existing validation.
 - [Effect](https://effect.website/docs/): models success, expected errors, and required
   services in types. Use it only when its programming model fits the task. It does
   not stop arbitrary JavaScript in a callback from reading global state, nor does its
-  expected-error channel cover every possible defect. Do not migrate to it merely
+  expected-error channel cover every possible defect. Do not migrate to it only
   to improve a few function signatures.
 
 For a custom rule, target a repeatable, demonstrable mistake: ambient API use in a
@@ -59,7 +59,7 @@ P:System.Random.Shared;Inject a random generator.
 
 This is an illustrative subset, not a complete ambient-state policy. Other time
 APIs, environment access, I/O, and application singletons need deliberate coverage.
-Keep effects available in the adapter projects that actually perform them.
+Keep effects available in the adapter projects that perform them.
 
 [ArchUnitNET](https://github.com/TNG/ArchUnitNET) can assert type/member dependencies
 and prohibited calls from compiled code. Use it for concrete layer policies, not
@@ -70,15 +70,15 @@ complexity and other maintainability checks. Custom Roslyn analyzers can inspect
 symbols and operations for project-specific policies such as mutable static access.
 Interprocedural honesty analysis needs explicit assumptions about external code,
 virtual dispatch, delegates, getters, aliasing, and unknown calls; start with a
-bounded policy instead of claiming comprehensive effect inference.
+bounded policy. Do not claim full effect inference.
 
 [`System.Diagnostics.Contracts.PureAttribute`](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.contracts.pureattribute)
 is an annotation, not a compiler proof that a body is pure. A tool consuming the
-attribute may trust it; do not confuse that trust with verified implementation.
+attribute can trust it. Do not confuse that trust with verified implementation.
 
-## Check the actual enforcement
+## Check the enforcement
 
-When adding tooling, demonstrate that a representative forbidden case fails in the
+When you add tooling, show that a representative forbidden case fails in the
 normal local/CI command and that a legitimate adapter or explicit dependency passes.
 For types, verify that invalid construction/calls are rejected and the factory's
 runtime invariant holds. Keep semantic review for naming, input breadth, abstraction
