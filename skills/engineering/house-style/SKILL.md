@@ -31,6 +31,12 @@ Language rules live in references. Read the one for each language in the diff be
 - A cleanup of existing code goes in its own commit, on the same pull request.
 - Where this style is silent, pick the plain shape.
 
+## Prior art
+
+- Before you design a format, a protocol, a schema, or a standard, search for the established ones that solve the same problem. Read their specs and their design rationale.
+- Name the prior art in the design: what it does, which principles carry over, and why you adopt it, adapt it, or build your own. A scene format starts from OpenUSD, a config format from the formats that already exist, an API from the conventions its callers know.
+- Before you add a rule, a helper, or a script, name the stock tool that already covers it. Write new code only for the gap that the tool leaves.
+
 ## Shape of a change
 
 - State the intended end state in one or two sentences before you write code. Build that state, as if the intended UX and architecture existed from day one.
@@ -99,6 +105,20 @@ Language rules live in references. Read the one for each language in the diff be
 - A user-facing numeric input clamps to a sane range, on change and on blur.
 - State that never shipped has no versioning or migration.
 
+## Logging
+
+Code is traceable: from the logs alone, a reader can follow one request or job from its start to its result.
+
+- Log at every boundary: an incoming request or job, every call to an external system, and every write to persistent state. Each entry carries the outcome and the duration.
+- Log every decision that changes the path: a fallback taken, a retry, a skip, a cache miss that falls through to the source.
+- A `catch` that recovers logs what it caught and what it did instead.
+- Logs are structured: a short fixed message plus key-value fields. Values go in fields, never interpolated into the message.
+- Every entry in one request or job carries the same correlation id, passed through to each downstream call.
+- Levels have one meaning each. `error`: someone must act. `warn`: degraded but handled. `info`: a boundary or a decision. `debug`: detail for one investigation.
+- Logs go through the project's logger. Ad-hoc `console.log` lines are debug leftovers and leave before merge.
+- Logs carry identifiers, never secrets, tokens, or personal data.
+- A log message and an error message follow the Writing rules: what happened, the cause if known, then the next action.
+
 ## Comments and docs
 
 - Comments are rare. A comment states a hidden constraint, an invariant, or a workaround, as the reason.
@@ -147,9 +167,34 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Data goes through the project's data layer, and reloads through it.
 - A change deletes the code it made obsolete, everywhere.
 
+## Verification
+
+- "Done", "fixed", and "works" mean that you ran it and saw the result. When you did not run it, say "untested" and list what changed.
+- A UI change is verified by a screenshot of the correct result.
+- Verify a fix that someone waits on before you commit or push it.
+
+## Debugging
+
+- Reproduce the failure before you change code.
+- Form one hypothesis, test that one hypothesis, and confirm it before you move on.
+- Keep a list of what you tried and ruled out. Never repeat an attempt that already failed.
+- When a fix gets "still broken" or "same error", the fix was wrong. Stop patching, and go back to the root cause.
+- For an environment problem (a stale dev server, a cache, a hot reload that missed), apply the operational fix: restart, clear, rebuild. Code stays as it is.
+
 ## Git
 
 - Every commit message is a Conventional Commit.
 - A branch name is a Conventional Commit type, a slash, and a kebab-case short name. With a Linear ticket, the id comes first: `feat/TEAM-123-linear-short-name`. Without one: `feat/short-name`.
 - One pull request per ticket. A fix found in review is a commit on the open pull request.
 - Every changed file in a pull request needed to change.
+
+## Pull requests
+
+- The title is a Conventional Commit: `type(scope): summary`.
+- Use the repository's pull request template when it has one.
+- The body describes the code as it is: what the change is and how it behaves. It explains why the change exists, then what it does.
+- Session detail stays out of the body and the commits: rebase history, what conflicted, "this changed because", local machine or environment notes, failures that already existed. Put that in chat.
+- The body states the checks that ran (typecheck, tests, lint) and the ones that did not, with the reason.
+- A UI change includes a screenshot.
+- Commits and bodies carry no AI attribution and no session links.
+- Name a pull request or a ticket by its id and its title together: "web #406: retry failed uploads once".

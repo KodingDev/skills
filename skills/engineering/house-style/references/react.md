@@ -59,6 +59,13 @@ Read this file with `SKILL.md` and `typescript.md` before you write or review a 
 - Mobile skips work too heavy for its memory, such as a high-resolution export.
 - Check every change on mobile.
 
+## Accessibility
+
+- Every input has a label.
+- Every mouse handler has a keyboard equivalent.
+- An interactive element is the semantic element for its job: `<button>`, `<a>`, `<nav>`. A `div` with a role is a bug.
+- Headings go in order, one level at a time.
+
 ## Copy
 
 - Copy follows the project's voice guide.
