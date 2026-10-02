@@ -53,6 +53,7 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 - Time uses Temporal, with a polyfill until every target runtime ships it. The polyfill loads once, at the app entry.
 - Pick the Temporal type for the meaning: `Instant` for a moment, `PlainDate` for a calendar date, `ZonedDateTime` for a moment in a place. `Date` stays at the edges where a library requires it.
 - A timestamp crosses a boundary as a UTC ISO 8601 string. Code converts to local time only for display.
+- Money is an integer count of minor units, branded, with its currency beside it: `{ amount: Cents; currency: "USD" }`. `Intl.NumberFormat` formats it only for display.
 - A guard runs once, in the function that owns it.
 - Data crosses a boundary through a Zod schema: a registry, a config, a param shape.
 - A module-level `const` that is not a function, a component, or a schema is SCREAMING_SNAKE: tunables, tables, value arrays.
