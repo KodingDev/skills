@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="./assets/banner.svg" alt="skills — for coding agents that should know better" width="100%">
+  <img src="./assets/banner.svg" alt="skills -- for coding agents that should know better" width="100%">
 </p>
 
-[![skills.sh](https://skills.sh/b/KodingDev/skills)](https://skills.sh/KodingDev/skills) · [MIT](./LICENSE)
+[![skills.sh](https://skills.sh/b/KodingDev/skills)](https://skills.sh/KodingDev/skills) | [MIT](./LICENSE)
 
 The agent skills I use for daily work with coding agents. Each skill is one folder: a `SKILL.md` and the files it reads. There is no runtime and no config.
 
@@ -50,14 +50,14 @@ How the sessions run.
 
 | Skill | What it does |
 | --- | --- |
-| [**`/design-space`**](./skills/design/design-space/SKILL.md) | A charrette before any code: a thesis, named anti-references, the real design axes, and 4–6 incompatible directions, presented unranked. |
+| [**`/design-space`**](./skills/design/design-space/SKILL.md) | A charrette before any code: a thesis, named anti-references, the real design axes, and 4-6 incompatible directions, presented unranked. |
 | [design-uplift](./skills/design/design-uplift/SKILL.md) | Turns a bland product into an identity: a locked foundation, numbered exploration passes, screenshot checks at every size, and a brand toolkit at the end. |
 
 ### Planning
 
 | Skill | What it does |
 | --- | --- |
-| [linear-method](./skills/planning/linear-method/SKILL.md) | The [Linear Method](https://linear.app/method) as working rules: initiatives, enablers and blockers, 1–3 week projects, issues over user stories, cycles, launches. |
+| [linear-method](./skills/planning/linear-method/SKILL.md) | The [Linear Method](https://linear.app/method) as working rules: initiatives, enablers and blockers, 1-3 week projects, issues over user stories, cycles, launches. |
 | [**`/plan-project`**](./skills/planning/plan-project/SKILL.md) | Turns ideas and design docs into a review-ready backlog of vertical-slice tickets, sequenced by dependency, for Jira or Linear. |
 
 ## Add a skill
@@ -69,4 +69,4 @@ skills/<bucket>/<skill>/SKILL.md   the skill, plus the files it reads
 .claude-plugin/plugin.json         the manifest that skills.sh installs from
 ```
 
-MIT © Stella Inwood
+MIT (c) Stella Inwood

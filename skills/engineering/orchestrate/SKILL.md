@@ -64,7 +64,7 @@ Before an agent reads anything, do the deterministic work with deterministic too
 - **Shrink the corpus first.** Use grep, jq, or scripts to filter gigabytes down to the
   megabytes that matter. Agents read the residue, never the raw pile. If code can express the
   filter, the filter is not the job of an agent.
-- **Known work-list → deterministic fan-out.** If you can enumerate the items up front
+- **Known work-list -> deterministic fan-out.** If you can enumerate the items up front
   (files, chunks, findings), dispatch one agent per item from a script or loop that you
   control. Use model-driven "continue until done" loops only for discovery of unknown size.
 - **Pin the chunking.** Split the inputs so that each chunk fits in the context of a worker,

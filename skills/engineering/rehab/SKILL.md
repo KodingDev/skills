@@ -1,7 +1,7 @@
 ---
 name: rehab
 description: >
-  Rehabilitate an AI-assisted codebase that has gone sloppy — audit the
+  Rehabilitate an AI-assisted codebase that went sloppy: audit the
   slop, fix the map the agent reads, put the rules file on a diet, convert
   prose into enforced checks, pay down the worst debt behind
   characterization tests, and close the loop so it stays clean.
@@ -11,8 +11,8 @@ disable-model-invocation: true
 # Rehab
 
 An AI-heavy repo does not rot because the model is careless. It rots because nothing in the
-loop can say no. The doom loop: sloppy codebase → the agent copies the slop → the tired human
-approves the diff → sloppier codebase. Rehab is the deliberate interruption of that loop. It
+loop can say no. The doom loop: sloppy codebase -> the agent copies the slop -> the tired human
+approves the diff -> sloppier codebase. Rehab is the deliberate interruption of that loop. It
 runs on one law:
 
 **Enforce, don't instruct.** Instructions are not verification. Prose is advisory. A failing
@@ -31,7 +31,7 @@ looks like, it would have written it. More exhortation is not the cure. More ver
 
 Run the stages in order for a full rehab. Or enter at one stage when the user asks for only
 that slice. The findings of stage 1 drive everything after it. Each later stage names what it
-consumes. The symptom → check catalog is in [symptoms.md](symptoms.md). Read it when stage 1
+consumes. The symptom -> check catalog is in [symptoms.md](symptoms.md). Read it when stage 1
 or stage 4 runs.
 
 Each stage lands on its own branch and PR off main. Never commit a rehab stage straight to
@@ -54,9 +54,8 @@ fix-spam. N consecutive one-line fixes to one subsystem is a missing test at tha
 bad luck. Score the enforcement of each package against its blast radius. The shared contract
 that three repos consume needs the *most* CI, not the least.
 
-Name what is healthy with the same rigor as what is sick. Rehab that tramples working rituals
-— clean PR descriptions, a lockstep release habit, a good rules file — costs more trust than
-it recovers. The healthy tissue is where the golden examples come from.
+Name what is healthy with the same rigor as what is sick. Rehab that tramples working rituals costs more trust than it recovers. Examples of working
+rituals: clean PR descriptions, a lockstep release habit, a good rules file. The healthy tissue is where the golden examples come from.
 
 **Done when** you can present all of these:
 
@@ -64,13 +63,13 @@ it recovers. The healthy tissue is where the golden examples come from.
 - The baseline metrics.
 - Each orienting doc and rules file, with a staleness verdict.
 - The three worst offenders, named with evidence.
-- The protect list — what works and must survive the rehab.
+- The protect list: what works and must survive the rehab.
 
 ## 2. Fix the map
 
 This move has the most leverage, and it touches no source code. Verify each structural claim
-in each doc that an agent reads as truth — package counts, stack lists, layout blocks, export
-targets, architecture diagrams, "the API is X" — against the tree. A hand-written claim about
+in each doc that an agent reads as truth against the tree. Structural claims are package counts,
+stack lists, layout blocks, export targets, architecture diagrams, and "the API is X". A hand-written claim about
 repo shape has exactly three futures: **generated** from the source of truth, **asserted** by
 a test that fails when the claim drifts, or **deleted**. If a doc admits its own staleness,
 delete it. Do not annotate it. An annotation teaches the next reader that stale is
@@ -83,8 +82,8 @@ status header, or you delete it. Scratch goes to a gitignored directory. A repo-
 
 The tracker is a map too, and agents read it. Apply the same three futures to process. If the
 data shows that a ritual does not run (cycles that complete nothing, milestones long past
-target, statuses frozen in flight), run the ritual honestly or delete it — **no silent
-theater**. If effort diverged from the stated strategy, that is a pivot that nobody recorded.
+target, statuses frozen in flight), run the ritual honestly or delete it. **No silent
+theater.** If effort diverged from the stated strategy, nobody recorded the pivot.
 Capture the decision in one short status update, or present it as a decision that the owner
 must make now.
 
@@ -100,7 +99,7 @@ must make now.
 Prune the rules file *before* you add anything. A bloated CLAUDE.md weakens each rule in it.
 Delete: what a reader can derive from the code, what a tool already enforces, what is
 task-specific rather than universal, and the hotfix lines that accreted one per annoyance.
-Target approximately 300 words.
+The target is about 300 words.
 
 Give shape to what survives: three tiers (*always* / *ask first* / *never*, with one line of
 why each), concrete examples over descriptive paragraphs, and `file:line` pointers to the
@@ -108,7 +107,7 @@ authoritative implementation instead of inline copies that go stale. Apply the e
 rule: each "never do X" that stays in prose is a ticket to make X mechanically impossible.
 Send it to stage 4.
 
-**Done when** the rules file is ≤300 words, each line is universal and cannot be a check, and
+**Done when** the rules file is 300 or fewer words, each line is universal and cannot be a check, and
 each deleted prohibition became a stage-4 check or died on its merits.
 
 ## 4. Law
@@ -146,7 +145,7 @@ substantial implementation. That is the opposite of the shallow pass-through lay
 agents accrete. Plant one **golden example** per recurring pattern (the canonical module, the
 canonical test, the canonical error path). The agent copies what it reads, so make the best
 file the template. Done means verified through real seams: tests green *and* logs clean *and*
-the workflow exercised — not the claim "should work now."
+the workflow exercised. The claim "should work now" is not done.
 
 **Done when** each worst offender is pinned, reshaped, or explicitly deferred with a named
 reason, each baseline metric moved, and the ratchets held.

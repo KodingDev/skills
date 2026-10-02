@@ -22,7 +22,7 @@ function isExpired(item: Expiring, now: number) {
 
 The caller can test equality at the expiry boundary without replacing global time.
 For a batch that should share one instant, capture time once outside the iteration.
-If an operation really needs repeated clock reads, inject a clock instead and make
+If an operation needs repeated clock reads, inject a clock instead and make
 that temporal behavior explicit. Do not force a snapshot where it changes semantics.
 
 ## An honest function can mutate
@@ -51,12 +51,12 @@ sequences across runtime versions unless the chosen algorithm guarantees them.
 
 A function that reflects a vector needs a unit normal, not an arbitrary vector.
 Design the API around `NormalizedVec3` and a fallible normalization factory.
-The factory handles zero and non-finite inputs and numerical scaling/tolerance
-appropriate to the application; consumers use the established guarantee.
+The factory handles zero and non-finite inputs and numerical scaling and tolerance
+for the application. Consumers use the established guarantee.
 
 - **TypeScript:** a private brand or encapsulated class distinguishes the type.
   Keep unchecked assertions inside the trusted factory. Prevent mutation through
-  returned references or aliases; shallow `Readonly` alone does not freeze data.
+  returned references or aliases. Shallow `Readonly` alone does not freeze data.
 - **C#:** a private-constructor immutable class can limit creation to a factory.
   A `readonly struct` still admits `default(T)`, which may violate the invariant.
   Design for that default explicitly or choose a representation that avoids it.
@@ -66,7 +66,7 @@ appropriate to the application; consumers use the established guarantee.
 
 Correction to the source video near 35:45: the cross product of two unit vectors
 is not generally a unit vector. Its length is `|sin(theta)|`; parallel vectors
-produce zero. Do not return `NormalizedVec3` solely because both operands have
+produce zero. Do not return `NormalizedVec3` only because both operands have
 that type. Normalize with failure handling, or require an additional valid
 orthogonality guarantee. A type annotation cannot establish a false theorem.
 
@@ -78,8 +78,8 @@ carry the validated data so callers cannot validate one object and use another.
 
 A `LockHeld` token is harder: it must refer to the correct lock and remain valid
 only while that lock is held. Ordinary TypeScript and C# tokens are not linear
-ownership proofs. Prefer scoped APIs plus appropriate runtime checks for resource
-lifetimes; do not claim an unforgeable-looking type alone prevents stale use.
+ownership proofs. Prefer scoped APIs plus runtime checks for resource
+lifetimes. Do not claim an unforgeable-looking type alone prevents stale use.
 
 ## The abstraction boundary is semantic
 
@@ -103,13 +103,13 @@ sealed class AssetIndex
 
 `Asset` and `AssetType` stand for existing domain types. The dictionary owns the
 same comparison policy for insertion and lookup. Verify that ordinal case-insensitive
-comparison matches the real identifier rules before adopting it; it is not a
+comparison matches the real identifier rules before you adopt it. It is not a
 universal replacement for Unicode normalization or locale-specific behavior.
-If missing and wrong-type must differ, use a richer result rather than this bool.
+If missing and wrong-type must differ, use a richer result in place of this bool.
 
-A TypeScript index can similarly own canonicalization and a `Map`. Avoid ad hoc
+A TypeScript index can also own canonicalization and a `Map`. Avoid ad hoc
 `.toLowerCase()` calls scattered across writers and readers. Use the same policy
-at every entry point and preserve existing collision behavior deliberately.
+at every entry point and keep the existing collision behavior on purpose.
 
 Extraction alone is not the goal. Replacing each statement with `stepOne()` and
 `stepTwo()` leaves the original design problem hidden behind uninformative names.

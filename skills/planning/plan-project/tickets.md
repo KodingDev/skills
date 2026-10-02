@@ -1,70 +1,57 @@
 # Tickets
 
-A ticket is a contract: enough that someone who wasn't in the room can pick it up and know what
-"done" means. The bar is **a mini-PRD, not a title** — the difference between a backlog you can
-hand to an AFK agent and one that needs a meeting per item.
+A ticket is a contract. Someone who was not in the room can pick it up and know what "done" means. The bar is **a mini-PRD, not a title**. That bar separates a backlog that an AFK agent can take from one that needs a meeting per item.
 
 ## The shape
 
-Every ticket carries these. Trim sections that don't apply; never trim the Why or the criteria.
+Every ticket carries these sections. Trim sections that do not apply. Never trim the Why or the criteria.
 
 ```
 ## Why
-One or two lines: the user/business reason, backed by evidence where it exists — a metric
+One or two lines: the user or business reason, with evidence where it exists: a metric
 (pageviews, conversion, error rate, $), a user report, a dependency ("unblocks X"). "Why now"
-beats "why ever". A ticket whose Why is just its title restated isn't ready.
+beats "why ever". A ticket whose Why restates its title is not ready.
 
 ## Scope
-What this slice delivers, as end-to-end behaviour — not a layer-by-layer to-do. When the
-codebase is known, name what changes vs what explicitly does NOT (the cheapest way to stop
-scope creep). Avoid file paths and code snippets — they go stale fast. Exception: a
-decision-encoding snippet (schema, state machine, type shape) that prose can't capture as
-precisely — inline just the decision-rich bit.
+What this slice delivers, as end-to-end behaviour, not a layer-by-layer to-do. When the
+codebase is known, name what changes and what explicitly does NOT (the cheapest way to stop
+scope creep). Leave out file paths and code snippets: they go stale fast. Exception: a
+snippet that encodes a decision (schema, state machine, type shape) that prose cannot state
+as precisely. Inline only the part that holds the decision.
 
 ## Acceptance criteria
-- [ ] Observable, checkable conditions — what's true when this is done
-- [ ] Phrased so a tester (or a test) can verify each one
+- [ ] Observable, checkable conditions: what is true when this is done
+- [ ] Each one phrased so that a tester (or a test) can verify it
 - [ ] The last one is a concrete ship gate ("merged to main", "deployed", "live on /x")
 
 ## Blocked by
-The tickets that must land first, or "None — can start immediately". (Filled in Stage 3.)
+The tickets that must land first, or "None - can start immediately". (Filled in Stage 3.)
 ```
 
-For in-flight work, add a `## State` line — PR #, commit/diff size, what's done vs left — so a
-reader knows where it stands without opening the branch.
+For work in flight, add a `## State` line: the PR number, the commit or diff size, and what is done and what is left. Then a reader knows where it stands without the branch.
 
-## Acceptance criteria — the craft
+## Acceptance criteria: the craft
 
-Criteria are **outcomes, not tasks**. "User sees an error toast when the upload fails" is
-checkable; "add error handling" is not. Use **Given/When/Then** only where a condition→action→
-result genuinely needs spelling out; elsewhere a plain checkbox is leaner and clearer. Each
-criterion must be **falsifiable** — if you can't write the test that fails when it's broken, it's
-too vague.
+Criteria are **outcomes, not tasks**. "User sees an error toast when the upload fails" is checkable. "Add error handling" is not. Use **Given/When/Then** only where a condition -> action -> result needs spelling out. Elsewhere, a plain checkbox is shorter and clearer. Each criterion must be **falsifiable**. If you cannot write the test that fails when it breaks, it is too vague.
 
 ## Ticket types
 
 Same shape, different emphasis:
 
-- **Story** — a user-facing slice. Why = user value; criteria = observable behaviour.
-- **Bug** — Why states impact + frequency; Scope becomes **steps to reproduce** + **expected vs
-  actual**; criteria = the repro no longer reproduces, plus a regression test.
-- **Spike** — a timeboxed question. Scope = the question and what decision it unblocks; the
-  acceptance criterion is **a documented decision**, not code. Cap the time.
-- **Task / chore** — non-user-facing (infra, tooling, deps). Why = the engineering payoff
-  (unblocks, removes risk, cuts toil); criteria still observable.
+- **Story**: a user-facing slice. Why = user value. Criteria = observable behaviour.
+- **Bug**: Why states impact and frequency. Scope becomes **steps to reproduce** plus **expected vs actual**. Criteria = the repro no longer reproduces, plus a regression test.
+- **Spike**: a timeboxed question. Scope = the question and the decision it unblocks. The acceptance criterion is **a documented decision**, not code. Cap the time.
+- **Task / chore**: work that is not user-facing (infra, tooling, deps). Why = the engineering payoff: it unblocks, removes risk, or cuts toil. Criteria stay observable.
 
 ## Definition of Ready / Done
 
-A ticket is **Ready** to start when it passes INVEST and this shape is filled — Why, bounded
-Scope, falsifiable criteria, known blockers. Not ready → spike it or break it down again.
+A ticket is **Ready** to start when it passes INVEST and this shape is filled: Why, bounded Scope, falsifiable criteria, and known blockers. If it is not ready, spike it or break it down again.
 
-A ticket is **Done** when every acceptance criterion is checked, tests cover the new behaviour,
-and the ship gate is met. "It works on my machine" is not a criterion.
+A ticket is **Done** when every acceptance criterion is checked, tests cover the new behaviour, and the ship gate is met. "It works on my machine" is not a criterion.
 
-## Lift, don't transcribe
+## Lift, do not transcribe
 
-Reactive tickets arrive thin — a title, a shout, two words. Your job is to **lift them to the
-bar**, not copy them across. The gap between a floor ticket and a real one is the teaching.
+Reactive tickets arrive thin: a title, a shout, two words. **Lift them to the bar**. Do not copy them across. The gap between a floor ticket and a real one is the teaching.
 
 ```
 Before (the floor):
@@ -93,14 +80,13 @@ After (the bar):
   - [ ] Merged to main
 ```
 
-The "after" took three things the "before" lacked: a Why with impact, a bounded Scope with an
-explicit *not*, and falsifiable criteria ending in a ship gate.
+The "after" adds three things that the "before" lacked: a Why with impact, a bounded Scope with an explicit *not*, and falsifiable criteria that end in a ship gate.
 
-## Done — checklist
+## Done: checklist
 
-- [ ] Every ticket has a Why backed by reason or metric — never the title restated.
-- [ ] Scope states end-to-end behaviour; an explicit *not* where the codebase is known.
-- [ ] Acceptance criteria are outcomes, falsifiable, ≥1 each, last one a ship gate.
-- [ ] Bugs carry repro + expected/actual; spikes deliver a decision, not code.
-- [ ] No title-only tickets survive; thin inputs were lifted, not transcribed.
-- [ ] No stale file paths or code dumps (decision-encoding snippets excepted).
+- [ ] Every ticket has a Why with a reason or a metric, never the title restated.
+- [ ] Scope states end-to-end behaviour, with an explicit *not* where the codebase is known.
+- [ ] Acceptance criteria are falsifiable outcomes, at least one per ticket, and the last one is a ship gate.
+- [ ] Bugs carry a repro plus expected and actual. Spikes deliver a decision, not code.
+- [ ] No title-only ticket remains. Thin inputs were lifted, not transcribed.
+- [ ] No stale file paths or code dumps. Snippets that encode a decision are the exception.

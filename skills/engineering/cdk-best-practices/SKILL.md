@@ -36,13 +36,13 @@ for each rule. Read it before you audit. The workflow and the rule index are bel
    `process.env` in `bin/` is permitted.
 
 4. **Classify each finding** by severity:
-   - **High** — a security risk or a data-loss risk. Examples: broad IAM, hardcoded names that
+   - **High**: a security risk or a data-loss risk. Examples: broad IAM, hardcoded names that
      block replacement, stateful resources that can lose data, stateful resources without a
      removal or retention decision.
-   - **Medium** — a maintainability or correctness problem. Examples: env vars inside
+   - **Medium**: a maintainability or correctness problem. Examples: env vars inside
      constructs, CfnParameter for configuration, stacks as the modeling unit, missing tests,
      no CDK Nag, deploy-time decisions.
-   - **Low** — a style or convention problem. Examples: wildcard imports, missing JSDoc,
+   - **Low**: a style or convention problem. Examples: wildcard imports, missing JSDoc,
      template snapshot tests.
 
 5. **Report.** Group the findings by severity. For each finding, give the `file:line`, the
@@ -51,7 +51,7 @@ for each rule. Read it before you audit. The workflow and the rule index are bel
    omit the note.
 
 6. **Fix or recommend.** On code you wrote in this session, or when the user says "fix",
-   apply the fixes and show the diff; the report is then the changelog. On code you did not
+   apply the fixes and show the diff. The report is then the changelog. On code you did not
    write and were asked to audit, recommend each fix and do not rewrite until the user says
    so.
 
@@ -65,7 +65,7 @@ the code to confirm each hit.
 |---|------|----------|-------------------------|
 | 1 | Least-privilege grants (`grantRead` over `grantReadWrite`/`grantFullAccess`) | High | `grantReadWrite\|grantFullAccess\|grantWrite` |
 | 2 | No broad IAM actions (`*`, `iam:*`, `s3:*`) in `PolicyStatement` | High | `actions:.*\*\|'\*'\|"\*"` near `PolicyStatement` |
-| 3 | Recognize the IAM-role approach (CDK-managed / pre-created / customized) | — | `Role.fromRoleArn\|new Role` |
+| 3 | Recognize the IAM-role approach (CDK-managed / pre-created / customized) | -- | `Role.fromRoleArn\|new Role` |
 | 3b/4 | No hardcoded physical names | High | `bucketName:\|tableName:\|functionName:\|queueName:\|roleName:` |
 | 5 | Decide at synthesis time, not deploy time (no `CfnParameter`/`CfnCondition`/`Fn.if`) | Medium | `CfnParameter\|CfnCondition\|Fn\.conditionIf\|Fn\.if` |
 | 6 | Explicit removal policy + log retention on stateful resources | High | `new Bucket\|new Table\|new Database`; check for `removalPolicy`/`RETAIN`/`retention` |
@@ -96,11 +96,11 @@ the code to confirm each hit.
 ## Output template
 
 ```
-# CDK Best Practices Audit — <target>
+# CDK Best Practices Audit -- <target>
 
 ## High
-- `lib/data-stack.ts:42` — **Hardcoded resource name** (rule 3b/4): `tableName: 'app-data'`.
-  Blocks a second deploy in one account and any replacement. → Remove `tableName`; reference `table.tableName`.
+- `lib/data-stack.ts:42` -- **Hardcoded resource name** (rule 3b/4): `tableName: 'app-data'`.
+  Blocks a second deploy in one account and any replacement. -> Remove `tableName`; reference `table.tableName`.
 
 ## Medium
 - ...

@@ -54,12 +54,12 @@ certs, a nonroot user, and sane defaults, without a shell or a package manager.
 ## 5. Digests over tags
 
 Tags move: `latest`, `nightly`, and even version tags, especially on internal registries. Pin
-the base image by digest (`node:26-slim@sha256:…`, from `docker buildx imagetools inspect`).
+the base image by digest (`node:26-slim@sha256:...`, from `docker buildx imagetools inspect`).
 Then the build is reproducible, whatever the tag points at tomorrow.
 
 ## Escape hatch: two processes, one container
 
-One process per container is a vibe, not a law. Sometimes an app needs a sidecar in the same
+One process per container is a default, not a law. Sometimes an app needs a sidecar in the same
 box (nginx in front of an app server), and you are not at orchestrator scale. Then run both
 under `supervisord` with autorestart. That costs less than the complexity of a second
 container.
