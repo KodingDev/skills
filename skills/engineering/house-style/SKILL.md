@@ -31,6 +31,7 @@ Language rules live in references. Read the one for each language in the diff be
 - Every hunk that a change touches meets this style in full.
 - A change reworks the code it touches into its intended shape, even when the diff grows.
 - A cleanup of existing code goes in its own commit, on the same pull request.
+- Where a language or its ecosystem has an established standard recommendation (its PEPs, its official style guide, its packaging authority), follow it.
 - Where this style is silent, pick the plain shape.
 
 ## Prior art
@@ -178,7 +179,7 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Each critical user flow (sign in, checkout, publish) has one end-to-end test, on a short named list. A change that touches a listed flow updates its test.
 - A test name is a sentence about behaviour. A format-string name (`"%j -> %j"`) is for a pure input-to-output table, inside a suite named for the function under test.
 - A row's meaning goes in its test name. The runner does not print trailing comments.
-- A test lives beside its code. Package code is tested in its package.
+- A test lives where the language's test runner expects it: beside its code in TypeScript, in `tests/` in Python. Package code is tested in its package.
 - Suites stay flat.
 
 ## Reuse before you write
