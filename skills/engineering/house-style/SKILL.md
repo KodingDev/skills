@@ -94,6 +94,10 @@ Language rules live in references. Read the one for each language in the diff be
 - Values are immutable by default. Mutation applies only to values that the function created and that stay inside it, such as a local counter or a builder set. Arguments, module-level values, and anything the caller can see stay unchanged.
 - A class is for a stateful thing with a lifecycle: a cache, a player, a connection. It owns private state, invariants, and disposal. Stateless code is plain functions.
 
+## APIs
+
+- A list endpoint pages by cursor: it returns `{ items, nextCursor }` with an opaque cursor. It adds `totalCount` only when the UI shows a total.
+
 ## Errors
 
 - Throw for bugs and broken invariants, with a custom error type and a descriptive message: `ConfigValidationError`.
