@@ -59,6 +59,24 @@ Read this file with `SKILL.md` and `typescript.md` before you write or review a 
 - Mobile skips work too heavy for its memory, such as a high-resolution export.
 - Check every change on mobile.
 
+## Composition
+
+Compose each interface from the user's task, then fill it with components. Nielsen's usability heuristics and the Gestalt principles are the prior art.
+
+- Start from the task: name what the user comes to do on this view, and the one primary action that does it. Every other element supports that task or moves out of the view.
+- One primary action per view. Secondary actions are visually quieter, and rare actions live in a menu.
+- Use progressive disclosure: show what most users need, and reveal advanced options, detail, and history on demand, in place.
+- Build a clear hierarchy: one focal point per view, with size, weight, and position, in that order. Color is the last tool.
+- Group by proximity. Related controls sit together, and space separates groups before borders or cards do.
+- Fewer choices are faster. Give a good default, and ask only for what the system cannot infer.
+- Keep the user in context. Edit in place, and use a modal only for a decision that must block the flow.
+- Every action gives feedback within 100 ms: a pressed state, an optimistic update, or a progress indicator.
+- Design every state of a view, not only the full one: empty, loading, partial, error, and overflowing content. An empty state says what goes there and how to add it.
+- Make the system state visible: what is selected, what is saved, and what is still running.
+- Prefer recognition to recall. Show the options, the current values, and the recent items.
+- Keep one spacing rhythm, from the design system's scale. Alignment lines run through the whole view.
+- Make actions reversible with undo where possible. A confirmation dialog is for an action that cannot be undone.
+
 ## Design choices
 
 - The project's design guidelines win: its design doc, its brand page.

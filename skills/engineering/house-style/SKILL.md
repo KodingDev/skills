@@ -140,6 +140,9 @@ Code is traceable: from the logs alone, a reader can follow one request or job f
 
 These rules apply to every comment, doc comment, error message, log line, pull request description, and commit message. UI copy follows the project's voice guide.
 
+- Write the least text that carries the facts. Prose is for reasoning that needs connected sentences. Steps are a numbered list, parallel facts are a bulleted list, and comparisons are a table.
+- Lead with the result or the decision. Detail follows, in the order that the reader needs it.
+- Use progressive disclosure: the summary on top, then details under headings, in collapsed sections, or behind links. A reader who stops after the first paragraph still has the answer.
 - Write in ASD-STE100 Simplified Technical English. A tired reader who is not a native speaker understands each sentence on one read.
 - Instructions are imperative: one instruction per sentence, 20 words or fewer. Descriptions use the simple present: one fact per sentence, 25 words or fewer.
 - Use the active voice and simple tenses.
