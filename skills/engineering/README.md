@@ -10,6 +10,7 @@ Skills for daily code work.
 | [`foreman`](./foreman/SKILL.md) | User-invoked (`/foreman`). Delivery orchestration for big changes: tracker tickets, worktree-per-ticket branches, worker fan-out, one human-reviewable PR per ticket per repo — every line reviewed, velocity from disjoint lanes. |
 | [`function-design`](./function-design/SKILL.md) | Design and review functions for explicit dependencies, meaningful contracts, and one level of abstraction; includes TypeScript/C# examples and enforcement guidance. |
 | [`golden`](./golden/SKILL.md) | Build-time bias toward the durable version of whatever's being built — golden from the start, exactly as simple as the problem's shape; the same bar as a review lens. |
+| [`house-style`](./house-style/SKILL.md) | Stella's review bar for every change: shape of a change, deep modules, control flow, names, errors, comments, STE writing, tests, and git, with TypeScript and React references. |
 | [`lean-containers`](./lean-containers/SKILL.md) | Container image discipline for writing or reviewing Dockerfiles: slim over alpine, layer-order caching, `.dockerignore`, multi-stage builds, digest pinning. |
 | [`orchestrate`](./orchestrate/SKILL.md) | Judgment for multi-agent work: builder/critic splits, model tiering, context hygiene, deterministic pre-extraction. |
 | [`pair`](./pair/SKILL.md) | User-invoked (`/pair`). Pair-programming mode: one move per turn, narrated, keyboard handed back at a live decision point, the small things treated as the real work. |
