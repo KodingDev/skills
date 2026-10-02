@@ -59,6 +59,13 @@ Read this file with `SKILL.md` and `typescript.md` before you write or review a 
 - Mobile skips work too heavy for its memory, such as a high-resolution export.
 - Check every change on mobile.
 
+## Design slop
+
+- The project's design guidelines win: its design doc, its brand page.
+- Section headings read clearly different from field labels.
+- Numbered section badges ("01", "02", "03"), a monospace font with no job, and generic three-card layouts are AI tells. Each design element has a reason from the content.
+- "Redesign it" means design from nothing. A reskin of the old page is not a redesign.
+
 ## Accessibility
 
 - Every input has a label.

@@ -3,9 +3,10 @@ name: house-style
 description: >
   The style for writing good code: the review bar that every change is
   written to and checked against, from the shape of a change down to names,
-  comments, and commit messages. Use when writing or reviewing code, when opening or
-  updating a pull request, or when the user says "house style", "my
-  standards", or "nitpicks".
+  comments, and commit messages. Use when writing, editing, or reviewing code,
+  when opening or updating a pull request, when doing UI work, or when the user
+  says "house style", "standards", "nitpicks", "behave", "no slop", "stop the
+  slop", or "too many comments".
 ---
 
 # House style
@@ -30,11 +31,14 @@ Language rules live in references. Read the one for each language in the diff be
 - A change reworks the code it touches into its intended shape, even when the diff grows.
 - A cleanup of existing code goes in its own commit, on the same pull request.
 - Where this style is silent, pick the plain shape.
+- Treat your own output as suspect. Before you present a finding, check each claim that you cannot defend. A claim from one source is "leaning toward", never "verified".
+- Evaluate a suggested approach on its merits, the user's included. When it has a flaw, say so with concrete evidence, give a recommendation, and ask once. After the decision, implement the chosen path in full.
+- Confirm before any destructive or irreversible action: deleting files or code, reverting work, resetting, force-pushing, dropping data.
 
 ## Prior art
 
 - Before you design a format, a protocol, a schema, or a standard, search for the established ones that solve the same problem. Read their specs and their design rationale.
-- Name the prior art in the design: what it does, which principles carry over, and why you adopt it, adapt it, or build your own. A scene format starts from OpenUSD, a config format from the formats that already exist, an API from the conventions its callers know.
+- Name the prior art in the design: what it does, which principles carry over, and why you adopt it, adapt it, or build your own. Even when you build your own, the established standard's principles shape the decisions.
 - Before you add a rule, a helper, or a script, name the stock tool that already covers it. Write new code only for the gap that the tool leaves.
 
 ## Shape of a change
@@ -127,6 +131,9 @@ Code is traceable: from the logs alone, a reader can follow one request or job f
 - A merged change has no TODOs.
 - A comment names no environment or session detail, such as a production URL or a local machine.
 - A cleanup keeps the useful comments that already exist: layout diagrams and real nuance.
+- When you edit a file, remove the comment slop in the code you touch: narration, banners, change logs.
+- Generic code names no domain. A shared module or a generic tool mentions no product, game, or customer.
+- Reasoning that the user needs goes in the chat response.
 - A line comment lives inside a function body. A top-level declaration that needs a comment gets a doc comment.
 - A section inside a body can carry one line comment, multiline if needed, when its first line does not show its purpose. The comment gives the reason, never a heading that repeats the code.
 - Every export has a doc comment: one or two sentences on what it does and what the types cannot say.
@@ -149,6 +156,7 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Every word carries a fact. Cut filler: leverage, utilize, ensure, simply, just, robust, seamlessly, comprehensive, "in order to", "it is worth noting", "allows you to", "is designed to". Write "for example" and "that is", and name the items in place of "etc.".
 - Keep complete grammar, with articles and "that".
 - Code, identifiers, paths, and quoted errors stay exact.
+- Everything that lands in the codebase is plain ASCII: `-` or `--` for dashes, straight quotes, `->` for arrows, regular spaces, and no emoji. Content that is meant to hold unicode, such as i18n strings and fixtures, keeps it.
 
 ## Tests
 
@@ -191,10 +199,11 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 ## Pull requests
 
 - The title is a Conventional Commit: `type(scope): summary`.
-- Use the repository's pull request template when it has one.
+- Use the repository's pull request template when it has one. When the conventions are not written down, infer them from recent merged pull requests.
+- A pull request describes its own diff against its base. A stacked pull request describes only its own slice.
 - The body describes the code as it is: what the change is and how it behaves. It explains why the change exists, then what it does.
 - Session detail stays out of the body and the commits: rebase history, what conflicted, "this changed because", local machine or environment notes, failures that already existed. Put that in chat.
 - The body states the checks that ran (typecheck, tests, lint) and the ones that did not, with the reason.
 - A UI change includes a screenshot.
-- Commits and bodies carry no AI attribution and no session links.
+- Commits and bodies carry no AI attribution and no trailer of any kind: no session links, no `Co-authored-by`, no "generated with".
 - Name a pull request or a ticket by its id and its title together: "web #406: retry failed uploads once".
