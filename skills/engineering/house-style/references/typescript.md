@@ -22,6 +22,13 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 - Return types are inferred. A component or a simple function carries no return annotation.
 - Derive types: `keyof typeof`, `z.infer`, `(typeof X)[number]`, and the library's infer helpers (`ResultOf`, `$types`). Callers use the infer helpers, so a hand-written alias of an inferred type stays unexported.
 - Narrow a type to the real domain union.
+- Every id is a branded type, so one id cannot pass for another:
+
+  ```ts
+  export type UserId = string & { readonly __brand: "UserId" };
+  ```
+
+  The schema at the boundary produces the brand (`z.string().brand<"UserId">()`), and code past the boundary never casts to it.
 - A closed set of values is a plain string union. When the values must be iterated, an `as const` array holds them and the union derives from it. Options and labels derive from the union.
 
   ```ts

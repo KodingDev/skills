@@ -14,6 +14,7 @@ Read this file with `SKILL.md` and `typescript.md` before you write or review a 
 - `ref` is a prop (React 19).
 - Page and route props use the framework's typed helpers, such as `PageProps` and `RouteProps<"/route">`.
 - Async data loads in Server Components. Client Components are synchronous.
+- `"use client"` sits as deep in the tree as possible: on the leaf that needs state, effects, or browser APIs. Its parents stay Server Components.
 - A link with `target="_blank"` has `rel="noopener"`.
 
 ## Events and rendering
@@ -27,11 +28,13 @@ Read this file with `SKILL.md` and `typescript.md` before you write or review a 
 - Effects sync with external systems only. Derived state and events live in render and handlers. See https://react.dev/learn/you-might-not-need-an-effect.
 - UI is state-driven. A ref holds a non-render value, and only when nothing else works.
 - A value derived from props is computed in render.
+- React Compiler handles memoization. Code has no `useMemo`, `useCallback`, or `memo`.
 - A hook lives beside the thing it controls.
 - A framework hook is a thin adapter over plain functions.
 - URL state uses nuqs (`parseAsInt`, `parseAsBoolean`, `createLoader`).
 - Browser state uses `usehooks-ts` (`useLocalStorage`, `useMediaQuery`).
-- Prefer the TanStack libraries wherever one fits: TanStack Form for forms, TanStack Store for shared client state, TanStack Query for server state.
+- Prefer the TanStack libraries wherever one fits: TanStack Form for forms, TanStack Store for shared client state.
+- Server data goes through tRPC. Use TanStack Query directly only for a source that tRPC cannot serve, such as a third-party API called from the client.
 
 ## Structure
 
