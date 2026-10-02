@@ -71,6 +71,7 @@ Language rules live in references. Read the one for each language in the diff be
 - A ternary has two leaves. Three or more branches become early returns or a lookup.
 - A ternary replaces an `if`/`else` that assigns or returns one of two values.
 - A lookup is a map or a record. Related lookups share one object, keyed by one key.
+- Async work that a user can abandon (by navigating away, typing again, or closing a dialog) takes a cancellation signal and passes it down to every call it makes.
 - A pass-through (a wrapper that only forwards) is deleted, and its caller calls the real thing.
 - A repeated guard becomes one helper that checks and fails, such as `ensurePermissions`.
 - A framework response uses the framework helper: `forbidden()`, `notFound()`.
@@ -96,6 +97,9 @@ Language rules live in references. Read the one for each language in the diff be
 
 ## APIs
 
+- A router is named for its resource, and its procedures are plain verbs: `user.get`, `user.list`, `user.update`. A qualifier tells two lookups apart: `user.get` and `user.getByEmail`.
+- A transport condition (unauthorized, forbidden, not found, rate-limited) throws the framework's error with the standard code, such as `TRPCError`. Shared client handling covers it.
+- A domain outcome that the UI branches on, such as "code already redeemed", returns as a union in the data. It stays typed per procedure, out of retries, and out of the error logs.
 - A list endpoint pages by cursor: it returns `{ items, nextCursor }` with an opaque cursor. It adds `totalCount` only when the UI shows a total.
 
 ## Errors
@@ -167,6 +171,10 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Tests are few and load-bearing: generic tests through shared builders and shared mocks. No side effects, no hard-coded environment.
 - Assert on observable outcomes through the interface. A test that must change when the implementation changes tests past the interface.
 - When a module gets deeper, delete the tests on its old shallow pieces and test the new interface.
+- A test double replaces only a true external system: a third-party API, the clock, randomness. Your own modules and services run for real, and the database runs on a local stand-in such as PGlite.
+- A snapshot is inline (`toMatchInlineSnapshot`) and holds small, stable, serialized output, such as a generated schema or a help text. Snapshot files do not exist. Infrastructure tests assert with fine-grained assertions.
+- Most wiring is covered by cross-module tests: several real modules composed through their public interfaces, with only external systems replaced.
+- Each critical user flow (sign in, checkout, publish) has one end-to-end test, on a short named list. A change that touches a listed flow updates its test.
 - A test name is a sentence about behaviour. A format-string name (`"%j -> %j"`) is for a pure input-to-output table, inside a suite named for the function under test.
 - A row's meaning goes in its test name. The runner does not print trailing comments.
 - A test lives beside its code. Package code is tested in its package.
@@ -191,6 +199,12 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Keep a list of what you tried and ruled out. Never repeat an attempt that already failed.
 - When a fix gets "still broken" or "same error", the fix was wrong. Stop patching, and go back to the root cause.
 - For an environment problem (a stale dev server, a cache, a hot reload that missed), apply the operational fix: restart, clear, rebuild. Code stays as it is.
+
+## Generated code
+
+- A generated file is output. A fix goes to the generator or its input, never to the file.
+- A generated file is committed in the same commit as its source.
+- CI runs every generator and fails on any diff.
 
 ## Git
 

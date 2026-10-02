@@ -45,6 +45,7 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 
 - A constant table uses `as const satisfies T`, so literal types survive. Parameters and `let` take annotations.
 - A value stands alone when nothing else rides with it: `Array<Item>`.
+- A generic with one obvious parameter names it `T`. With two or more, each gets a `T`-prefixed word: `<TItem, TKey extends PropertyKey>`.
 
 ## Values
 
@@ -63,6 +64,7 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 
 - Declare a function as an arrow: `export const name = () => {}`.
 - Return an expression directly: `=> Object.values(x)`.
+- Each way to call an operation is its own named function: `loadUserById`, `loadUserByEmail`. Overloads and mode options do not exist.
 - Declare a generator as `function*` at module level. Arguments carry its state in, and yields carry results out.
 - `async`/`await` is the only promise style. Independent awaits run together in `Promise.all`.
 - Collection work uses one remeda chain (`pipe`, `filter`, `map`, `groupBy`, `sortBy`). A fixed list is an array literal.
