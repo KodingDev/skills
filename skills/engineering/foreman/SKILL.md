@@ -87,7 +87,7 @@ the user. Send the full picture each time. The tool's input schema describes eac
   of each lane.
 - For each lane, a short summary, the plan as todos with a rough ETA each, and the
   resources it owns with a label.
-- Every item in `needs`.
+- In `needs`, only what waits on the user now. Send an empty list when nothing waits.
 
 The user reads it with `/lanes`. When the tool is absent, give the same picture in chat
 at each milestone. When the user stops a worker with `/lanes stop`, re-plan that lane.

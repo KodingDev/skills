@@ -79,7 +79,7 @@ const REPORT_SCHEMA = {
   properties: {
     program: { type: 'string', description: 'The program id. Every session on one program sends the same id. One lower-case path segment.' },
     lanes: { type: 'array', items: LANE_SCHEMA, description: 'Every open lane. Leave out lanes that are done.' },
-    needs: { type: 'array', items: { type: 'string' }, description: 'Each decision or review that waits on the user, one line each.' },
+    needs: { type: 'array', items: { type: 'string' }, description: 'Each decision or review that waits on the user now, one line each. Send an empty array when nothing waits. Put later plans in a lane summary or todo.' },
     eta: { type: 'string', description: 'Rough estimate for the whole program.' },
   },
   required: ['program', 'lanes'],
