@@ -4,6 +4,7 @@ import type { EngineInterface, Register } from 'claude-code'
 import type { AgentRow, Lane, SessionFile, Todo } from '../types'
 
 import { formatElapsed } from './elapsed'
+import { progressBar } from './progress-bar'
 import { CWD_ARGV, LISTEN_ARGV, PS_ARGV, sampleLanes } from './lane-processes'
 import { isProgramName, isSessionFile, mergeSessions } from './program-view'
 import { parseReport } from './report-input'
@@ -16,8 +17,9 @@ const TICK_MS = 5000
 const SAMPLE_MS = 15000
 const LIVE_STATUSES = new Set(['pending', 'running', 'waiting', 'idle'])
 const DATA_FOLDER_ID = 'foreman-kodingdev'
+const PROGRESS_WIDTH = 20
 
-const TODO_MARKS = { done: '[x]', active: '[>]', pending: '[ ]' } as const satisfies Record<Todo['state'], string>
+const TODO_MARKS = { done: '[x]', active: '>', pending: '-' } as const satisfies Record<Todo['state'], string>
 
 const program = atom({ plugin: 'foreman', key: 'program' } as const, null)
 const own = atom({ plugin: 'foreman', key: 'own' } as const, null)
@@ -258,109 +260,143 @@ export const register: Register = on => {
     const laneAgents = new Set(lanes.map(lane => lane.agent))
     const looseAgents = agents.filter(agent => !laneAgents.has(agent.name))
     const needs = [...(current?.needs ?? []), ...asked]
+    const labelWidth = Math.max(0, ...lanes.flatMap(lane => [...lane.resources, ...(current?.usage[lane.lane]?.ports ?? [])].map(resource => resource.label.length)))
 
     return (
-      <Box flexDirection="column">
-        <Text bold wrap="truncate-end">
-          {selected ?? 'No program'}
-          {current !== null && <Text dimColor> | {countOf(current.sessionCount, 'session')}</Text>}
-          {current?.eta !== undefined && <Text> | ETA {current.eta}</Text>}
-        </Text>
+      <Box flexDirection="column" gap={1}>
+        <Box justifyContent="space-between">
+          <Text bold wrap="truncate-end">
+            {selected ?? 'No program'}
+          </Text>
+          <Text dimColor>
+            {current !== null && countOf(current.sessionCount, 'session')}
+            {current?.eta !== undefined && <Text color="cyan">  ETA {current.eta}</Text>}
+          </Text>
+        </Box>
         {others.length > 0 && (
-          <Box>
-            <Text dimColor>Switch: </Text>
+          <Box gap={1}>
+            <Text dimColor>switch</Text>
             {others.map(name => (
               <Button key={`program-${name}`} label={name} plain onPress={() => void selectProgram($, name)} />
             ))}
           </Box>
         )}
 
-        {lanes.length === 0 && <Text dimColor>No lanes. Agents send them with the report tool.</Text>}
+        {needs.length > 0 && (
+          <Box flexDirection="column" borderStyle="round" borderColor="yellow" paddingX={1}>
+            <Text bold color="yellow">
+              Needs you
+            </Text>
+            {needs.map(need => (
+              <Text wrap="truncate-end">{need}</Text>
+            ))}
+          </Box>
+        )}
+
+        {lanes.length === 0 && <Text dimColor>No lanes yet. Agents send them with the report tool.</Text>}
         {lanes.map(lane => {
           const worker = agents.find(agent => agent.name === lane.agent)
           const used = current?.usage[lane.lane]
           const doneCount = lane.todos.filter(todo => todo.state === 'done').length
+          const openTodos = lane.todos.filter(todo => todo.state !== 'done')
           const resources = [...lane.resources, ...(used?.ports ?? [])]
+          const isStalled = worker?.isStalled === true
+          const footer = [
+            worker === undefined ? '' : `${worker.name} ${isStalled ? 'stalled' : worker.status}, active ${formatElapsed(now, worker.lastSeen)} ago`,
+            used === undefined ? '' : `${used.rssGb.toFixed(1)} GB  ${Math.round(used.cpuPercent)}% CPU  ${countOf(used.processCount, 'process', 'processes')}`,
+            worker === undefined || worker.tokenCount === 0 ? '' : `${formatTokens(worker.tokenCount)} tokens`,
+          ].filter(part => part.length > 0)
 
           return (
-            <Box flexDirection="column" marginTop={1}>
+            <Box key={`lane-${lane.lane}`} flexDirection="column" borderStyle="round" borderColor={isStalled ? 'red' : 'gray'} paddingX={1}>
+              <Box justifyContent="space-between">
+                <Text wrap="truncate-end">
+                  <Text bold>{lane.lane}</Text>
+                  <Text dimColor>  {lane.title}</Text>
+                </Text>
+                {lane.eta !== undefined && <Text color="cyan">{lane.eta}</Text>}
+              </Box>
               <Text wrap="truncate-end">
-                <Text color={worker?.isStalled ? 'red' : 'green'}>* </Text>
-                <Text bold>{lane.lane}</Text> {lane.title}
+                <Text color={isStalled ? 'red' : 'green'}>{lane.status}</Text>
+                <Text dimColor>  for {formatElapsed(now, lane.statusSince)}</Text>
               </Text>
-              <Text dimColor wrap="truncate-end">
-                {'  '}
-                {lane.status} | {formatElapsed(now, lane.statusSince)}
-                {lane.eta !== undefined && ` | ETA ${lane.eta}`}
-                {lane.todos.length > 0 && ` | ${doneCount}/${lane.todos.length} done`}
-                {worker !== undefined && ` | ${worker.name} ${worker.isStalled ? 'STALLED' : worker.status}, active ${formatElapsed(now, worker.lastSeen)} ago`}
-              </Text>
+              {lane.todos.length > 0 && (
+                <Text>
+                  <Text color="green">{progressBar(doneCount, lane.todos.length, PROGRESS_WIDTH)}</Text>
+                  <Text dimColor>
+                    {'  '}
+                    {doneCount}/{lane.todos.length} done
+                  </Text>
+                </Text>
+              )}
               {lane.summary !== undefined && (
-                <Box marginLeft={2}>
+                <Box marginTop={1}>
                   <Markdown key={`summary-${lane.lane}`} text={lane.summary} />
                 </Box>
               )}
-              {lane.todos.map(todo => (
-                <Text dimColor={todo.state === 'done'} wrap="truncate-end">
-                  {'  '}
-                  <Text color={todo.state === 'active' ? 'cyan' : undefined}>{TODO_MARKS[todo.state]}</Text> {todo.text}
-                  {todo.eta !== undefined && <Text dimColor> ({todo.eta})</Text>}
-                </Text>
-              ))}
-              {resources.map(resource => (
-                <Text wrap="truncate-end">
-                  {'  '}
-                  <Text dimColor>{resource.label}</Text> {resource.value}
-                  {resource.isObserved === true && <Text dimColor> (seen)</Text>}
-                </Text>
-              ))}
-              {(used !== undefined || (worker?.tokenCount ?? 0) > 0) && (
-                <Text dimColor wrap="truncate-end">
-                  {'  '}
-                  {used !== undefined && `${used.rssGb.toFixed(1)} GB | ${Math.round(used.cpuPercent)}% CPU | ${countOf(used.processCount, 'process', 'processes')}`}
-                  {worker !== undefined && worker.tokenCount > 0 && ` | ${formatTokens(worker.tokenCount)} tokens`}
-                </Text>
+              {openTodos.length > 0 && (
+                <Box flexDirection="column" marginTop={1}>
+                  {openTodos.map(todo => (
+                    <Box justifyContent="space-between">
+                      <Text dimColor={todo.state === 'pending'} wrap="truncate-end">
+                        <Text color={todo.state === 'active' ? 'cyan' : undefined}>{TODO_MARKS[todo.state]}</Text> {todo.text}
+                      </Text>
+                      {todo.eta !== undefined && <Text dimColor>{todo.eta}</Text>}
+                    </Box>
+                  ))}
+                </Box>
+              )}
+              {resources.length > 0 && (
+                <Box flexDirection="column" marginTop={1}>
+                  {resources.map(resource => (
+                    <Text wrap="truncate-end">
+                      <Text dimColor>{resource.label.padEnd(labelWidth)}  </Text>
+                      {resource.value}
+                      {resource.isObserved === true && <Text dimColor>  seen</Text>}
+                    </Text>
+                  ))}
+                </Box>
+              )}
+              {footer.length > 0 && (
+                <Box marginTop={1}>
+                  <Text dimColor wrap="truncate-end">
+                    {footer.join('  |  ')}
+                  </Text>
+                </Box>
               )}
             </Box>
           )
         })}
 
-        {needs.length > 0 && (
-          <Box flexDirection="column" marginTop={1}>
-            <Text bold>Needs you</Text>
-            {needs.map(need => (
-              <Text color="yellow" wrap="truncate-end">- {need}</Text>
-            ))}
-          </Box>
-        )}
-
         {looseAgents.length > 0 && (
-          <Box flexDirection="column" marginTop={1}>
+          <Box flexDirection="column">
             <Text bold>Other agents</Text>
             {looseAgents.map(agent => (
               <Text color={agent.isStalled ? 'red' : undefined} dimColor={!agent.isStalled} wrap="truncate-end">
-                {agent.isStalled ? 'STALLED' : agent.status} {agent.name} | active {formatElapsed(now, agent.lastSeen)} ago
+                {agent.name}  {agent.isStalled ? 'stalled' : agent.status}, active {formatElapsed(now, agent.lastSeen)} ago
               </Text>
             ))}
           </Box>
         )}
 
         {denied.length > 0 && (
-          <Box flexDirection="column" marginTop={1}>
-            <Text bold>Permission denials</Text>
+          <Box flexDirection="column">
+            <Text bold color="red">
+              Permission denials
+            </Text>
             {denied.slice(-5).map(denial => (
-              <Text color="red" wrap="truncate-end">
-                {denial.tool} {formatElapsed(now, denial.at)} ago: {denial.reason}
+              <Text wrap="truncate-end">
+                <Text color="red">{denial.tool}</Text>
+                <Text dimColor>
+                  {'  '}
+                  {formatElapsed(now, denial.at)} ago  {denial.reason}
+                </Text>
               </Text>
             ))}
           </Box>
         )}
 
-        {current !== null && current.totalRssGb > 0 && (
-          <Box marginTop={1}>
-            <Text dimColor>Machine memory in use: {current.totalRssGb.toFixed(1)} GB</Text>
-          </Box>
-        )}
+        {current !== null && current.totalRssGb > 0 && <Text dimColor>Machine memory in use: {current.totalRssGb.toFixed(1)} GB</Text>}
       </Box>
     )
   })
@@ -499,24 +535,22 @@ const stopLane = async ($: EngineInterface, laneName: string) => {
 const statusLine = async ($: EngineInterface) => {
   const selected = await read($, program)
   const current = await read($, view)
-  if (current === null) {
+  const asked = await read($, waiting)
+  const isIdle = current === null || (current.lanes.length === 0 && current.agents.length === 0 && current.needs.length === 0 && asked.length === 0)
+  if (isIdle) {
     return undefined
   }
 
   const stalledCount = current.agents.filter(agent => agent.isStalled).length
-  const asked = await read($, waiting)
   const needCount = current.needs.length + asked.length
   const parts = [
-    selected ?? 'no program',
-    countOf(current.lanes.length, 'lane'),
-    countOf(current.agents.length, 'agent'),
+    `${selected ?? 'no program'}: ${countOf(current.lanes.length, 'lane')}`,
     stalledCount > 0 ? `${stalledCount} stalled` : '',
     needCount > 0 ? `${needCount} need you` : '',
     current.eta === undefined ? '' : `ETA ${current.eta}`,
-    current.totalRssGb > 0 ? `RAM ${current.totalRssGb.toFixed(0)}G` : '',
   ]
 
-  return parts.filter(part => part.length > 0).join(' | ')
+  return parts.filter(part => part.length > 0).join(', ')
 }
 
 const describeQuestion = async ($: EngineInterface, agentId: string, asked: Array<{ question: string }>) => {

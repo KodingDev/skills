@@ -83,7 +83,7 @@ test('a lane keeps its status age across reports with the same status', async ($
 
   for (const surface of ['terminal', 'desktop'] as const) {
     const pane = await $.ui.mount({ plugin: 'foreman', surface, ...PANE })
-    expect(await pane.find({ type: 'Text', text: /porting \| 30m/ })).toBeDefined()
+    expect(await pane.find({ type: 'Text', text: /for 30m/ })).toBeDefined()
     expect(await pane.find({ type: 'Markdown', key: 'summary-rust-port' })).toBeDefined()
     await pane.unmount()
   }
@@ -120,9 +120,9 @@ test('a lane shows its todos with progress and the resources its agent labeled',
 
   const pane = await $.ui.mount({ plugin: 'foreman', surface: 'terminal', ...PANE })
   expect(await pane.find({ type: 'Text', text: /1\/3 done/ })).toBeDefined()
-  expect(await pane.find({ type: 'Text', text: /\[>\] Port the bloom pass/ })).toBeDefined()
+  expect(await pane.find({ type: 'Text', text: /> Port the bloom pass/ })).toBeDefined()
   expect(await pane.find({ type: 'Text', text: /~20m/ })).toBeDefined()
-  expect(await pane.find({ type: 'Text', text: /dev server http:\/\/localhost:5173/ })).toBeDefined()
+  expect(await pane.find({ type: 'Text', text: /dev server\s+http:\/\/localhost:5173/ })).toBeDefined()
   await pane.unmount()
 })
 
