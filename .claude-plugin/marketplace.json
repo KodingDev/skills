@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "kodingdev",
+  "description": "Stella Inwood's skills and Claude Code mods.",
+  "owner": {
+    "name": "Stella Inwood",
+    "url": "https://github.com/KodingDev"
+  },
+  "plugins": [
+    {
+      "name": "skills",
+      "source": "./skills",
+      "description": "Every skill in this repo. The preferred install is npx skills add KodingDev/skills.",
+      "skills": [
+        "./design/design-space",
+        "./design/design-uplift",
+        "./engineering/canon",
+        "./engineering/cdk-best-practices",
+        "./engineering/dotnet-profiling",
+        "./engineering/foreman",
+        "./engineering/function-design",
+        "./engineering/golden",
+        "./engineering/house-style",
+        "./engineering/lean-containers",
+        "./engineering/orchestrate",
+        "./engineering/pair",
+        "./engineering/red-team",
+        "./engineering/rehab",
+        "./engineering/using-codex",
+        "./planning/linear-method",
+        "./planning/plan-project"
+      ]
+    },
+    {
+      "name": "foreman",
+      "source": "./mods/foreman",
+      "description": "Live lanes, agents, resources, and what needs you for a foreman program."
+    }
+  ]
+}

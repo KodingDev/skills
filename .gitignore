@@ -6,5 +6,5 @@ node_modules
 .meridian/
 
 # Engine-generated mod types
-skills/*/*/.claude-plugin/types/
-skills/*/*/tsconfig.json
+mods/*/.claude-plugin/types/
+mods/*/tsconfig.json
