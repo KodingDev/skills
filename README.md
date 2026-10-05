@@ -45,6 +45,7 @@ How the sessions run.
 | [**`/foreman`**](./skills/engineering/foreman/SKILL.md) | Delivery for big changes: tickets, a worktree per ticket, worker fan-out, and one reviewable PR per ticket per repo. |
 | [**`/rehab`**](./skills/engineering/rehab/SKILL.md) | Rehabilitates a sloppy AI-assisted codebase: fix the docs the agent reads, cut the rules file, and turn prose rules into checks. |
 | [orchestrate](./skills/engineering/orchestrate/SKILL.md) | Judgment for multi-agent work: separate builders from critics, cheap models compile and expensive models judge, tools shrink the corpus first. |
+| [using-codex](./skills/engineering/using-codex/SKILL.md) | Hands code and test writing to the Codex CLI in a worktree. A script records each round and catches commits that Codex makes. You brief, review every hunk, and commit. |
 
 ### Design
 
