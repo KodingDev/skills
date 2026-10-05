@@ -212,3 +212,18 @@ test('the session file marks the session gone when the session ends', async ($, 
   const saved = JSON.parse(files.get(`${PROGRAMS}/niagara/${SESSION_ID}.json`) ?? '{}')
   expect(saved.updatedAt).toBe(0)
 })
+
+test('a report patches the lanes it names, closes the lanes it lists, and keeps needs it leaves out', async ($, on) => {
+  world(on)
+  const other = { lane: 'webgl', title: 'PSY-2: WebGL runtime', status: 'testing' }
+  const done = { lane: 'docs', title: 'PSY-3: Docs', status: 'in review' }
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [LANE, other, done], needs: ['Approve PR #12'] })
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [{ ...LANE, status: 'tests green' }], closed: ['docs'] })
+
+  const pane = await $.ui.mount({ plugin: 'foreman', surface: 'terminal', ...PANE })
+  expect(await pane.find({ type: 'Text', text: /tests green/ })).toBeDefined()
+  expect(await pane.find({ type: 'Text', text: /PSY-2: WebGL runtime/ })).toBeDefined()
+  expect(await pane.find({ type: 'Text', text: /PSY-3: Docs/ })).toBeUndefined()
+  expect(await pane.find({ type: 'Text', text: /Approve PR #12/ })).toBeDefined()
+  await pane.unmount()
+})

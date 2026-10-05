@@ -13,7 +13,8 @@ export type ReportedLane = Omit<Lane, 'statusSince'>
 export type Report = {
   program: string
   lanes: ReportedLane[]
-  needs: string[]
+  closed: string[]
+  needs?: string[]
   eta?: string
 }
 
@@ -83,13 +84,13 @@ const readLane = (value: unknown) => {
  * Read the arguments of a `report` call. Returns the reason when a required field is missing.
  */
 export const parseReport = (input: Record<string, unknown>): ReportParse => {
-  const { program, lanes, needs, eta } = input
+  const { program, lanes = [], closed, needs, eta } = input
 
   if (typeof program !== 'string' || !isProgramName(program)) {
     return { isValid: false, reason: 'program must be one lower-case path segment, for example "niagara-consolidation".' }
   }
   if (!Array.isArray(lanes)) {
-    return { isValid: false, reason: 'lanes must be an array. Send an empty array when no lane is open.' }
+    return { isValid: false, reason: 'lanes must be an array of the lanes that changed.' }
   }
 
   const read = lanes.map(readLane)
@@ -101,7 +102,8 @@ export const parseReport = (input: Record<string, unknown>): ReportParse => {
   const report: Report = {
     program,
     lanes: read.filter(lane => lane !== null),
-    needs: Array.isArray(needs) ? needs.filter(need => typeof need === 'string') : [],
+    closed: Array.isArray(closed) ? closed.filter(name => typeof name === 'string') : [],
+    needs: Array.isArray(needs) ? needs.filter(need => typeof need === 'string') : undefined,
     eta: optionalText(eta),
   }
 

@@ -21,11 +21,12 @@ The band above the prompt lists what needs you, stalled agents, and permission d
 
 ## The report tool
 
-Agents call `mcp__foreman__report` with the full picture after each change. Each call replaces the session's last one. The input schema in [`hooks/register.tsx`](hooks/register.tsx) describes each field:
+Agents call `mcp__foreman__report` after each change, with only what changed. The input schema in [`hooks/register.tsx`](hooks/register.tsx) describes each field:
 
 - `program`: the program id. Every session on one program sends the same id.
-- `lanes`: each open lane, with `lane`, `title`, and `status`. Optional: `agent`, `worktree`, `summary`, `eta`, `todos`, and `resources`.
-- `needs`: each decision or review that waits on you.
+- `lanes`: each lane that changed, with `lane`, `title`, and `status`. Optional: `agent`, `worktree`, `summary`, `eta`, `todos`, and `resources`. A sent lane replaces the lane of the same name.
+- `closed`: the names of lanes that are done.
+- `needs`: each decision or review that waits on you now. It replaces the last list. If it is left out, the last list stays.
 - `eta`: a rough estimate for the whole program.
 
 The [`foreman`](../../skills/engineering/foreman/SKILL.md) skill tells its agents to send these reports.

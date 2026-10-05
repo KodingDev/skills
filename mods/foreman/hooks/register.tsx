@@ -78,11 +78,12 @@ const REPORT_SCHEMA = {
   type: 'object',
   properties: {
     program: { type: 'string', description: 'The program id. Every session on one program sends the same id. One lower-case path segment.' },
-    lanes: { type: 'array', items: LANE_SCHEMA, description: 'Every open lane. Leave out lanes that are done.' },
-    needs: { type: 'array', items: { type: 'string' }, description: 'Each decision or review that waits on the user now, one line each. Send an empty array when nothing waits. Put later plans in a lane summary or todo.' },
+    lanes: { type: 'array', items: LANE_SCHEMA, description: 'Only the lanes that changed. Each one replaces the lane of the same name; other lanes stay.' },
+    closed: { type: 'array', items: { type: 'string' }, description: 'Names of lanes that are done. They leave the view.' },
+    needs: { type: 'array', items: { type: 'string' }, description: 'Each decision or review that waits on the user now, one line each. Replaces the last list; leave it out to keep it, send [] when nothing waits. Put later plans in a todo.' },
     eta: { type: 'string', description: 'Rough estimate for the whole program.' },
   },
-  required: ['program', 'lanes'],
+  required: ['program'],
 }
 
 export const register: Register = on => {
@@ -95,7 +96,7 @@ export const register: Register = on => {
     await $.tool.register({
       name: 'report',
       description:
-        'Report the lanes of your program so the user can see them. Send the full picture after each meaningful change. Each call replaces your last one.',
+        'Report the lanes of your program so the user can see them. Send only what changed: changed lanes, closed lanes, and needs or eta when they change.',
       inputSchema: REPORT_SCHEMA,
     })
     await pruneSessionFiles($)
@@ -142,20 +143,24 @@ export const register: Register = on => {
     const now = await $.clock.now()
     const sessionId = await $.session.id()
     const previous = await read($, own)
-    const lanes: Lane[] = report.lanes.map(lane => {
+    const isSameProgram = previous?.program === report.program
+    const kept = (isSameProgram ? previous.lanes : []).filter(lane => !report.closed.includes(lane.lane))
+    const sent: Lane[] = report.lanes.map(lane => {
       const before = previous?.lanes.find(one => one.lane === lane.lane)
       const statusSince = before?.status === lane.status ? before.statusSince : now
 
       return { ...lane, statusSince }
     })
+    const sentNames = new Set(sent.map(lane => lane.lane))
+    const lanes = [...kept.filter(lane => !sentNames.has(lane.lane)), ...sent]
 
     const file: SessionFile = {
       sessionId,
       program: report.program,
       updatedAt: now,
       lanes,
-      needs: report.needs,
-      eta: report.eta,
+      needs: report.needs ?? (isSameProgram ? previous.needs : []),
+      eta: report.eta ?? (isSameProgram ? previous.eta : undefined),
       agents: previous?.agents ?? [],
       usage: previous?.usage ?? {},
       totalRssGb: previous?.totalRssGb ?? 0,
@@ -168,7 +173,7 @@ export const register: Register = on => {
     }
     await refreshView($, now)
 
-    const text = `Recorded ${countOf(lanes.length, 'lane')} and ${countOf(report.needs.length, 'item')} that wait on the user for ${report.program}.`
+    const text = `${report.program}: ${countOf(lanes.length, 'open lane')}, ${countOf(file.needs.length, 'need')}.`
 
     return { result: text, text }
   })
