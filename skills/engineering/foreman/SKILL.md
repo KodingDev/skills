@@ -72,6 +72,16 @@ These hold for every program. The playbook never restates them; it only sets var
 
 - Never busy-wait; poll long runs in the background, and watch each to a terminal state.
 - When a lane closes, reap its agents, shells, and worktrees.
+- Name every worker after its lane (`Agent({ name })`). Report lanes by name and ticket
+  title, never by agent id.
+
+## Status report
+
+The user must see the program without asking. When the `mcp__foreman__report` tool
+exists, call it after every stage change, every PR, and every new decision that waits on
+the user. Send the full picture each time: every open lane with its stage, worker, PR, and
+ETA, and every item in `needs`. The user reads it with `/lanes`. When the tool is absent,
+give the same picture in chat at each milestone.
 
 ## The loop (per ticket)
 
@@ -85,7 +95,9 @@ These hold for every program. The playbook never restates them; it only sets var
    merge order.
 5. **Self-review** before the PR: run the playbook's verification recipe and the
    baseline suites, check the brief's done-when list, read the diff as a cold reviewer.
-   Fix what you find. Never outsource a known defect to the user.
+   Compare every deleted or renamed path against the brief's FILES IN SCOPE; a deletion
+   outside that list is a defect. Fix what you find. Never outsource a known defect to
+   the user.
 6. **PR**: one per repo the ticket touches, conventions below, ticket linked. Move to In Review.
 7. **Feedback**: route each comment to a worker verbatim with file context; apply as
    fixup commits on the same PR; push; reply on the PR only to confirm what changed.

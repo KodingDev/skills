@@ -4,3 +4,7 @@ node_modules
 .vscode/
 .claude/
 .meridian/
+
+# Engine-generated mod types
+skills/*/*/.claude-plugin/types/
+skills/*/*/tsconfig.json
