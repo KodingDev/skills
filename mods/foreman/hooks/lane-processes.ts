@@ -79,12 +79,32 @@ const parseNamesByPid = (lsofOutput: string) => {
 
 const isInside = (folder: string, root: string) => folder === root || folder.startsWith(`${root}/`)
 
+/**
+ * The pids of the session that runs the sample: every ancestor of the `ps` process. The session
+ * often starts inside a worktree, and its own memory and ports must not count for that lane.
+ */
+const sessionPids = (processes: Process[]) => {
+  const parentOf = new Map(processes.map(process => [process.pid, process.ppid]))
+  const pids = new Set<number>()
+
+  for (const sampler of processes.filter(process => process.command === 'ps')) {
+    let pid = sampler.pid
+    while (pid > 1 && !pids.has(pid)) {
+      pids.add(pid)
+      pid = parentOf.get(pid) ?? 0
+    }
+  }
+
+  return pids
+}
+
 const assignLanes = (processes: Process[], cwdOutput: string, worktrees: Record<string, string>) => {
   const folders = parseNamesByPid(cwdOutput)
   const roots = Object.entries(worktrees)
+  const skipped = sessionPids(processes)
   const laneOfPid = new Map<number, string>()
 
-  for (const process of processes) {
+  for (const process of processes.filter(one => !skipped.has(one.pid))) {
     const folder = folders.get(process.pid)?.[0]
     const owner = folder === undefined ? undefined : roots.find(([, root]) => isInside(folder, root))
     if (owner !== undefined) {
@@ -98,7 +118,7 @@ const assignLanes = (processes: Process[], cwdOutput: string, worktrees: Record<
     hasChanged = false
     for (const process of processes) {
       const parentLane = laneOfPid.get(process.ppid)
-      if (parentLane !== undefined && !laneOfPid.has(process.pid)) {
+      if (parentLane !== undefined && !laneOfPid.has(process.pid) && !skipped.has(process.pid)) {
         laneOfPid.set(process.pid, parentLane)
         hasChanged = true
       }

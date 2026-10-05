@@ -1,10 +1,10 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { AgentRow, Lane, SessionFile, Todo } from '../types'
+import type { AgentRow, Lane, SessionFile } from '../types'
 
 import { formatElapsed } from './elapsed'
-import { progressBar } from './progress-bar'
+import { countOf, laneCard } from './lane-card'
 import { CWD_ARGV, LISTEN_ARGV, PS_ARGV, sampleLanes } from './lane-processes'
 import { isProgramName, isSessionFile, mergeSessions } from './program-view'
 import { parseReport } from './report-input'
@@ -17,9 +17,10 @@ const TICK_MS = 5000
 const SAMPLE_MS = 15000
 const LIVE_STATUSES = new Set(['pending', 'running', 'waiting', 'idle'])
 const DATA_FOLDER_ID = 'foreman-kodingdev'
-const PROGRESS_WIDTH = 20
-
-const TODO_MARKS = { done: '[x]', active: '>', pending: '-' } as const satisfies Record<Todo['state'], string>
+const HEARTBEAT_MS = 60 * 1000
+const SEEN_THROTTLE_MS = 1000
+const PROGRAM_STALE_MS = 24 * 60 * 60 * 1000
+const MAIN_ID = 'main'
 
 const program = atom({ plugin: 'foreman', key: 'program' } as const, null)
 const own = atom({ plugin: 'foreman', key: 'own' } as const, null)
@@ -33,6 +34,8 @@ const tracking = atom({ plugin: 'foreman', key: 'tracking' } as const, {
   stallToasted: [],
   heavyToasted: [],
   lastSampleAt: 0,
+  lastWriteAt: 0,
+  lastWriteKey: '',
 })
 
 const LANE_SCHEMA = {
@@ -95,6 +98,7 @@ export const register: Register = on => {
         'Report the lanes of your program so the user can see them. Send the full picture after each meaningful change. Each call replaces your last one.',
       inputSchema: REPORT_SCHEMA,
     })
+    await pruneSessionFiles($)
     $.clock.every(TICK_MS, () => void tick($))
 
     return next(e)
@@ -103,7 +107,7 @@ export const register: Register = on => {
   on('session.end', async ($, e, next) => {
     const current = await read($, own)
     if (current !== null) {
-      await writeSessionFile($, { ...current, updatedAt: 0 })
+      await saveSessionFile($, { ...current, updatedAt: 0 }, true)
     }
 
     return next(e)
@@ -156,8 +160,7 @@ export const register: Register = on => {
       usage: previous?.usage ?? {},
       totalRssGb: previous?.totalRssGb ?? 0,
     }
-    await update($, own, () => file)
-    await writeSessionFile($, file)
+    await saveSessionFile($, file, true)
 
     const selected = await read($, program)
     if (selected === null) {
@@ -171,13 +174,16 @@ export const register: Register = on => {
   })
 
   on('tool.call', async ($, e, next) => {
-    const agentId = e.agentId
+    const agentId = e.agentId ?? MAIN_ID
     const now = await $.clock.now()
-    if (agentId !== undefined) {
-      await update($, tracking, before => ({ ...before, lastSeen: { ...before.lastSeen, [agentId]: now } }))
+    const before = await read($, tracking)
+    const isSeenStale = now - (before.lastSeen[agentId] ?? 0) >= SEEN_THROTTLE_MS
+    if (isSeenStale) {
+      await update($, tracking, latest => ({ ...latest, lastSeen: { ...latest.lastSeen, [agentId]: now } }))
     }
 
-    const question = e.tool === 'AskUserQuestion' && agentId !== undefined ? await describeQuestion($, agentId, e.questions) : null
+    const isSubagentQuestion = e.tool === 'AskUserQuestion' && e.agentId !== undefined
+    const question = isSubagentQuestion ? await describeQuestion($, agentId, e.questions) : null
     if (question !== null) {
       await update($, waiting, list => [...list, question])
     }
@@ -196,8 +202,9 @@ export const register: Register = on => {
   })
 
   on('turn.complete', async ($, e, next) => {
-    const { agentId, usage } = e
-    if (agentId !== undefined && usage !== undefined) {
+    const agentId = e.agentId ?? MAIN_ID
+    const { usage } = e
+    if (usage !== undefined) {
       const spent = usage.input_tokens + usage.output_tokens + usage.cache_creation_input_tokens
       await update($, tracking, before => ({
         ...before,
@@ -246,7 +253,8 @@ export const register: Register = on => {
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
-    const { Box, Button, Markdown, Text } = $.ui.resolve(e)
+    const elements = $.ui.resolve(e)
+    const { Box, Button, Text } = elements
     const now = await $.clock.now()
     const selected = await read($, program)
     const current = await read($, view)
@@ -258,7 +266,7 @@ export const register: Register = on => {
     const lanes = current?.lanes ?? []
     const agents = current?.agents ?? []
     const laneAgents = new Set(lanes.map(lane => lane.agent))
-    const looseAgents = agents.filter(agent => !laneAgents.has(agent.name))
+    const looseAgents = agents.filter(agent => agent.id !== MAIN_ID && !laneAgents.has(agent.name))
     const needs = [...(current?.needs ?? []), ...asked]
     const labelWidth = Math.max(0, ...lanes.flatMap(lane => [...lane.resources, ...(current?.usage[lane.lane]?.ports ?? [])].map(resource => resource.label.length)))
 
@@ -296,76 +304,8 @@ export const register: Register = on => {
         {lanes.length === 0 && <Text dimColor>No lanes yet. Agents send them with the report tool.</Text>}
         {lanes.map(lane => {
           const worker = agents.find(agent => agent.name === lane.agent)
-          const used = current?.usage[lane.lane]
-          const doneCount = lane.todos.filter(todo => todo.state === 'done').length
-          const openTodos = lane.todos.filter(todo => todo.state !== 'done')
-          const resources = [...lane.resources, ...(used?.ports ?? [])]
-          const isStalled = worker?.isStalled === true
-          const footer = [
-            worker === undefined ? '' : `${worker.name} ${isStalled ? 'stalled' : worker.status}, active ${formatElapsed(now, worker.lastSeen)} ago`,
-            used === undefined ? '' : `${used.rssGb.toFixed(1)} GB  ${Math.round(used.cpuPercent)}% CPU  ${countOf(used.processCount, 'process', 'processes')}`,
-            worker === undefined || worker.tokenCount === 0 ? '' : `${formatTokens(worker.tokenCount)} tokens`,
-          ].filter(part => part.length > 0)
 
-          return (
-            <Box key={`lane-${lane.lane}`} flexDirection="column" borderStyle="round" borderColor={isStalled ? 'red' : 'gray'} paddingX={1}>
-              <Box justifyContent="space-between">
-                <Text wrap="truncate-end">
-                  <Text bold>{lane.lane}</Text>
-                  <Text dimColor>  {lane.title}</Text>
-                </Text>
-                {lane.eta !== undefined && <Text color="cyan">{lane.eta}</Text>}
-              </Box>
-              <Text wrap="truncate-end">
-                <Text color={isStalled ? 'red' : 'green'}>{lane.status}</Text>
-                <Text dimColor>  for {formatElapsed(now, lane.statusSince)}</Text>
-              </Text>
-              {lane.todos.length > 0 && (
-                <Text>
-                  <Text color="green">{progressBar(doneCount, lane.todos.length, PROGRESS_WIDTH)}</Text>
-                  <Text dimColor>
-                    {'  '}
-                    {doneCount}/{lane.todos.length} done
-                  </Text>
-                </Text>
-              )}
-              {lane.summary !== undefined && (
-                <Box marginTop={1}>
-                  <Markdown key={`summary-${lane.lane}`} text={lane.summary} />
-                </Box>
-              )}
-              {openTodos.length > 0 && (
-                <Box flexDirection="column" marginTop={1}>
-                  {openTodos.map(todo => (
-                    <Box justifyContent="space-between">
-                      <Text dimColor={todo.state === 'pending'} wrap="truncate-end">
-                        <Text color={todo.state === 'active' ? 'cyan' : undefined}>{TODO_MARKS[todo.state]}</Text> {todo.text}
-                      </Text>
-                      {todo.eta !== undefined && <Text dimColor>{todo.eta}</Text>}
-                    </Box>
-                  ))}
-                </Box>
-              )}
-              {resources.length > 0 && (
-                <Box flexDirection="column" marginTop={1}>
-                  {resources.map(resource => (
-                    <Text wrap="truncate-end">
-                      <Text dimColor>{resource.label.padEnd(labelWidth)}  </Text>
-                      {resource.value}
-                      {resource.isObserved === true && <Text dimColor>  seen</Text>}
-                    </Text>
-                  ))}
-                </Box>
-              )}
-              {footer.length > 0 && (
-                <Box marginTop={1}>
-                  <Text dimColor wrap="truncate-end">
-                    {footer.join('  |  ')}
-                  </Text>
-                </Box>
-              )}
-            </Box>
-          )
+          return laneCard(elements, lane, worker, current?.usage[lane.lane], labelWidth, now)
         })}
 
         {looseAgents.length > 0 && (
@@ -413,7 +353,15 @@ const tick = async ($: EngineInterface) => {
     lastSeen[agent.id] = lastSeen[agent.id] ?? now
   }
 
-  const agents: AgentRow[] = live.map(agent => {
+  const mainRow: AgentRow = {
+    id: MAIN_ID,
+    name: MAIN_ID,
+    status: 'running',
+    lastSeen: lastSeen[MAIN_ID] ?? now,
+    isStalled: false,
+    tokenCount: before.tokens[MAIN_ID] ?? 0,
+  }
+  const subagents: AgentRow[] = live.map(agent => {
     const seen = lastSeen[agent.id] ?? now
     const row: AgentRow = {
       id: agent.id,
@@ -427,6 +375,7 @@ const tick = async ($: EngineInterface) => {
     return row
   })
 
+  const agents = [mainRow, ...subagents]
   const newlyStalled = agents.filter(agent => agent.isStalled && !before.stallToasted.includes(agent.id))
   for (const agent of newlyStalled) {
     $.ui.toast(`lanes: ${agent.name} has made no tool call for ${formatElapsed(now, agent.lastSeen)}`)
@@ -462,8 +411,7 @@ const tick = async ($: EngineInterface) => {
       usage: sampled?.lanes ?? current.usage,
       totalRssGb: sampled?.totalRssGb ?? current.totalRssGb,
     }
-    await update($, own, () => file)
-    await writeSessionFile($, file)
+    await saveSessionFile($, file, false)
   }
 
   await refreshView($, now, agents)
@@ -536,7 +484,8 @@ const statusLine = async ($: EngineInterface) => {
   const selected = await read($, program)
   const current = await read($, view)
   const asked = await read($, waiting)
-  const isIdle = current === null || (current.lanes.length === 0 && current.agents.length === 0 && current.needs.length === 0 && asked.length === 0)
+  const hasSubagents = current?.agents.some(agent => agent.id !== MAIN_ID) === true
+  const isIdle = current === null || (current.lanes.length === 0 && !hasSubagents && current.needs.length === 0 && asked.length === 0)
   if (isIdle) {
     return undefined
   }
@@ -580,12 +529,44 @@ const listPrograms = async ($: EngineInterface) => {
     return []
   }
 
+  const now = await $.clock.now()
   const entries = await $.fs.list(root)
+  const folders = entries.filter(entry => entry.kind === 'dir' && isProgramName(entry.name))
+  const active = await Promise.all(
+    folders.map(async folder => {
+      const files = await $.fs.list(`${root}/${folder.name}`)
+      const isActive = files.some(file => now - file.mtimeMs < PROGRAM_STALE_MS)
 
-  return entries
-    .filter(entry => entry.kind === 'dir' && isProgramName(entry.name))
-    .map(entry => entry.name)
-    .sort()
+      return isActive ? [folder.name] : []
+    }),
+  )
+
+  return active.flat().sort()
+}
+
+const pruneSessionFiles = async ($: EngineInterface) => {
+  const root = `${await dataFolder($)}/programs`
+  const hasRoot = await $.fs.exists(root)
+  if (!hasRoot) {
+    return
+  }
+
+  const now = await $.clock.now()
+  const folders = (await $.fs.list(root)).filter(entry => entry.kind === 'dir')
+  const listed = await Promise.all(
+    folders.map(async folder => {
+      const files = await $.fs.list(`${root}/${folder.name}`)
+
+      return files.filter(file => file.name.endsWith('.json') && now - file.mtimeMs >= PROGRAM_STALE_MS).map(file => `${root}/${folder.name}/${file.name}`)
+    }),
+  )
+  const stale = listed.flat()
+  if (stale.length === 0) {
+    return
+  }
+
+  // $.fs cannot delete. A host without rm keeps the files, and listPrograms still hides them.
+  await $.process.run(['rm', '-f', ...stale]).catch(() => null)
 }
 
 const readProgramFiles = async ($: EngineInterface, name: string) => {
@@ -604,9 +585,23 @@ const readProgramFiles = async ($: EngineInterface, name: string) => {
   })
 }
 
-const writeSessionFile = async ($: EngineInterface, file: SessionFile) => {
+/**
+ * Keep the session's report in state and on disk. Unforced, the disk write happens only when the
+ * content changed or the heartbeat is due, so other sessions see this one as live.
+ */
+const saveSessionFile = async ($: EngineInterface, file: SessionFile, isForced: boolean) => {
+  await update($, own, () => file)
+
+  const key = JSON.stringify({ ...file, updatedAt: 0 })
+  const before = await read($, tracking)
+  const isDue = isForced || key !== before.lastWriteKey || file.updatedAt - before.lastWriteAt >= HEARTBEAT_MS
+  if (!isDue) {
+    return
+  }
+
   const folder = `${await dataFolder($)}/programs/${file.program}`
   await $.fs.write(`${folder}/${file.sessionId}.json`, JSON.stringify(file))
+  await update($, tracking, latest => ({ ...latest, lastWriteAt: file.updatedAt, lastWriteKey: key }))
 }
 
 const parseJson = (text: string): unknown => {
@@ -617,7 +612,3 @@ const parseJson = (text: string): unknown => {
     return null
   }
 }
-
-const countOf = (count: number, noun: string, plural = `${noun}s`) => `${count} ${count === 1 ? noun : plural}`
-
-const formatTokens = (count: number) => (count >= 1_000_000 ? `${(count / 1_000_000).toFixed(1)}M` : `${Math.round(count / 1000)}k`)

@@ -101,6 +101,8 @@ export type Tracking = {
   stallToasted: string[]
   heavyToasted: string[]
   lastSampleAt: number
+  lastWriteAt: number
+  lastWriteKey: string
 }
 
 declare module 'claude-code' {

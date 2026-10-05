@@ -30,3 +30,18 @@ test('a lane counts the processes in its worktree and their children, and nothin
   expect(sample.totalRssGb).toBe(15)
   expect(sample.heaviest).toEqual({ pid: 200, rssGb: 8, lane: 'rust-port' })
 })
+
+test('the session that runs the sample counts for no lane, even when it starts inside a worktree', () => {
+  const psOutput = [`  500     1 ${3 * GB_IN_KB}  20.0 claude`, `  510   500 ${GB_IN_KB / 1024}   0.0 ps`, `  520   500 ${2 * GB_IN_KB}  30.0 node`].join('\n')
+  const cwdOutput = ['p500', 'n/work/webgl', 'p510', 'n/work/webgl', 'p520', 'n/work/webgl'].join('\n')
+  const listenOutput = ['p500', 'f7', 'n127.0.0.1:4100', 'p520', 'f9', 'n*:5173'].join('\n')
+
+  const sample = sampleLanes(psOutput, cwdOutput, listenOutput, WORKTREES)
+
+  expect(sample.lanes.webgl).toEqual({
+    rssGb: 2,
+    cpuPercent: 30,
+    processCount: 1,
+    ports: [{ label: 'node', value: 'localhost:5173', isObserved: true }],
+  })
+})

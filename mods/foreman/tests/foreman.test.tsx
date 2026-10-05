@@ -1,5 +1,5 @@
 import { expect, mock, test } from 'claude-code/testing'
-import type { On } from 'claude-code'
+import type { AgentInfo, On } from 'claude-code'
 
 import type { SessionFile } from '../types'
 
@@ -31,17 +31,31 @@ const PEER_FILE: SessionFile = {
   totalRssGb: 0,
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000
+const STARTED = { cwd: '/work', surface: null, isInteractive: true } as const
+
+type Seed = Record<string, string | { text: string; mtimeMs: number }>
+
 /**
- * The world beneath the mod: a clock, an in-memory file system, a home folder, one session id, no agents.
+ * The world beneath the mod: a clock, an in-memory file system, a home folder, one session id, the
+ * given agents, and a process runner that records each argv and fails.
  */
-const world = (on: On, seed: Record<string, string> = {}) => {
-  const files = new Map(Object.entries(seed))
+const world = (on: On, seed: Seed = {}, agents: AgentInfo[] = []) => {
+  const entries = Object.entries(seed).map(([path, file]) => [path, typeof file === 'string' ? { text: file, mtimeMs: START } : file] as const)
+  const files = new Map(entries.map(([path, file]) => [path, file.text]))
+  const mtimes = new Map(entries.map(([path, file]) => [path, file.mtimeMs]))
+  const runs: string[][] = []
+  const toasts: string[] = []
   const isFolder = (path: string) => [...files.keys()].some(file => file.startsWith(`${path}/`))
 
   const clock = mock.clock(on, { now: START })
   mock.env(on, { HOME })
   on('session.id', () => ({ value: SESSION_ID }))
-  on('agent.list', () => ({ value: [] }))
+  on('agent.list', () => ({ value: agents }))
+  on('ui.toast', (_$, e) => {
+    toasts.push(e.text)
+    return { value: undefined }
+  })
   on('fs.exists', (_$, e) => ({ value: files.has(e.path) || isFolder(e.path) }))
   on('fs.write', (_$, e) => {
     files.set(e.path, e.text)
@@ -54,14 +68,21 @@ const world = (on: On, seed: Record<string, string> = {}) => {
       name,
       kind: files.has(`${e.path}/${name}`) ? ('file' as const) : ('dir' as const),
       size: 0,
-      mtimeMs: 0,
+      mtimeMs: mtimes.get(`${e.path}/${name}`) ?? START,
       isLink: false,
     }))
     return { value: entries }
   })
-  on('process.run', () => ({ value: { exitCode: 1, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }))
+  on('session.start', (_$, e) => ({ cwd: e.cwd }))
+  on('session.end', (_$, e) => ({ sessionId: e.sessionId }))
+  on('command.register', (_$, e) => ({ value: { command: e.name } }))
+  on('tool.register', (_$, e) => ({ value: { tool: e.name } }))
+  on('process.run', (_$, e) => {
+    runs.push([...e.argv])
+    return { value: { exitCode: 1, stdout: '', stderr: '', isStdoutTruncated: false, isStderrTruncated: false } }
+  })
 
-  return { clock, files }
+  return { clock, files, runs, toasts }
 }
 
 test('a report joins the lanes of every live session on the same program', async ($, on) => {
@@ -155,4 +176,39 @@ test('a denied tool call shows in the band', async ($, on) => {
   const band = await $.ui.mount({ plugin: 'foreman', surface: 'terminal', ...BAND })
   expect(await band.find({ type: 'Text', text: /1 permission denial \(last: Bash\)/ })).toBeDefined()
   await band.unmount()
+})
+
+test('a program with no session file from the last day is hidden, and its files are removed', async ($, on) => {
+  const old = { text: JSON.stringify({ ...PEER_FILE, program: 'billing' }), mtimeMs: START - 2 * DAY_MS }
+  const { runs } = world(on, { [`${PROGRAMS}/billing/session-b.json`]: old })
+  await $.session.start(STARTED)
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [LANE] })
+
+  const pane = await $.ui.mount({ plugin: 'foreman', surface: 'terminal', ...PANE })
+  expect(await pane.find({ key: 'program-billing' })).toBeUndefined()
+  expect(runs).toContainEqual(['rm', '-f', `${PROGRAMS}/billing/session-b.json`])
+  await pane.unmount()
+})
+
+test('an agent with no tool call for ten minutes shows as stalled, with one toast', async ($, on) => {
+  const agent: AgentInfo = { id: 'agent-1', name: 'rusty', description: 'Port the shader', type: 'general-purpose', status: 'running' }
+  const { clock, toasts } = world(on, {}, [agent])
+  await $.session.start(STARTED)
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [LANE] })
+  await clock.advance(11 * 60 * 1000)
+  await clock.advance(60 * 1000)
+
+  const pane = await $.ui.mount({ plugin: 'foreman', surface: 'terminal', ...PANE })
+  expect(await pane.find({ type: 'Text', text: /rusty stalled/ })).toBeDefined()
+  expect(toasts.filter(toast => toast.includes('rusty'))).toHaveLength(1)
+  await pane.unmount()
+})
+
+test('the session file marks the session gone when the session ends', async ($, on) => {
+  const { files } = world(on)
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [LANE] })
+  await $.session.end({ reason: 'clear', sessionId: SESSION_ID, resume: { id: SESSION_ID } })
+
+  const saved = JSON.parse(files.get(`${PROGRAMS}/niagara/${SESSION_ID}.json`) ?? '{}')
+  expect(saved.updatedAt).toBe(0)
 })
