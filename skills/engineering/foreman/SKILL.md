@@ -79,9 +79,17 @@ These hold for every program. The playbook never restates them; it only sets var
 
 The user must see the program without asking. When the `mcp__foreman__report` tool
 exists, call it after every stage change, every PR, and every new decision that waits on
-the user. Send the full picture each time: every open lane with its stage, worker, PR, and
-ETA, and every item in `needs`. The user reads it with `/lanes`. When the tool is absent,
-give the same picture in chat at each milestone.
+the user. Send the full picture each time:
+
+- `program`: the program id from the playbook. Every session on this program sends the
+  same name, so their lanes show together.
+- Every open lane with its stage, worker, worktree path, PR, and ETA. The worktree path
+  lets the user see the memory and CPU of each lane.
+- Every item in `needs`.
+
+The user reads it with `/lanes`. When the user stops a worker with `/lanes stop`, a note
+arrives in your conversation: re-plan that lane. When the tool is absent, give the same
+picture in chat at each milestone.
 
 ## The loop (per ticket)
 
