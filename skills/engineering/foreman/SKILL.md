@@ -82,14 +82,17 @@ exists, call it after every stage change, every PR, and every new decision that 
 the user. Send the full picture each time:
 
 - `program`: the program id from the playbook. Every session on this program sends the
-  same name, so their lanes show together.
-- Every open lane with its stage, worker, worktree path, PR, and ETA. The worktree path
-  lets the user see the memory and CPU of each lane.
+  same id, so their lanes show together.
+- Every open lane: its name, the ticket id and title, a status in a few words, the
+  worker's name, and the worktree path. The worktree path lets the user see the memory,
+  CPU, and listening ports of each lane.
+- For each lane, what helps the user stay aligned: a one- or two-sentence summary, the
+  plan as todos with a rough ETA each, and the resources it owns with a label, such as
+  a dev server URL or the PR.
 - Every item in `needs`.
 
-The user reads it with `/lanes`. When the user stops a worker with `/lanes stop`, a note
-arrives in your conversation: re-plan that lane. When the tool is absent, give the same
-picture in chat at each milestone.
+The user reads it with `/lanes`. When the tool is absent, give the same picture in chat
+at each milestone. When the user stops a worker with `/lanes stop`, re-plan that lane.
 
 ## The loop (per ticket)
 

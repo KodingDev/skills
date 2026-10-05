@@ -27,7 +27,7 @@ claude plugin install foreman@kodingdev
 
 | Mod | What it does |
 | --- | --- |
-| [foreman](./mods/foreman) | `/lanes` shows the lanes of one foreman program: stage, ETA, worker, PR, stalled agents, and what needs you. |
+| [foreman](./mods/foreman) | `/lanes` shows the lanes of one program: what each agent says it is doing, its todos and resources, plus the memory, CPU, ports, and stalls the mod sees. |
 
 To work on a mod, add your clone as the marketplace: `claude plugin marketplace add <path to clone>`. Claude Code then reads the plugin from your clone, and `/reload-plugins` picks up edits.
 

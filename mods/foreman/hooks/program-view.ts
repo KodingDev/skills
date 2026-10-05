@@ -51,7 +51,7 @@ export const mergeSessions = (program: string, files: SessionFile[], now: number
     needs: live.flatMap(file => file.needs),
     eta: newest?.eta,
     agents: live.flatMap(file => file.agents),
-    resources: newest?.resources ?? {},
+    usage: newest?.usage ?? {},
     totalRssGb: newest?.totalRssGb ?? 0,
   }
 

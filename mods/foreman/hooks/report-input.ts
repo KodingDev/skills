@@ -1,18 +1,18 @@
-import type { Lane, Stage } from '../types'
+import type { Lane, LaneResource, Todo } from '../types'
 
 import { isProgramName } from './program-view'
 
 /**
- * The stages in loop order. The report tool's schema and its parser share this list.
+ * A lane as an agent reports it, before the mod adds the time its status changed.
  */
-export const STAGES = ['pick', 'branch', 'brief', 'execute', 'self-review', 'pr', 'feedback', 'merge', 'blocked'] as const satisfies readonly Stage[]
+export type ReportedLane = Omit<Lane, 'statusSince'>
 
 /**
- * A report as foreman sends it: lanes without their stage start time.
+ * A report as an agent sends it.
  */
 export type Report = {
   program: string
-  lanes: Omit<Lane, 'stageSince'>[]
+  lanes: ReportedLane[]
   needs: string[]
   eta?: string
 }
@@ -22,41 +22,65 @@ export type Report = {
  */
 export type ReportParse = { isValid: true; report: Report } | { isValid: false; reason: string }
 
+const TODO_STATES = ['pending', 'active', 'done'] as const satisfies readonly Todo['state'][]
+
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 
-const isStage = (value: unknown): value is Stage => STAGES.some(stage => stage === value)
-
 const optionalText = (value: unknown) => (typeof value === 'string' && value.length > 0 ? value : undefined)
+
+const listOf = <T,>(value: unknown, read: (item: unknown) => T | null) => (Array.isArray(value) ? value.map(read).filter(item => item !== null) : [])
+
+const readTodo = (value: unknown) => {
+  if (!isRecord(value) || typeof value.text !== 'string') {
+    return null
+  }
+
+  const todo: Todo = {
+    text: value.text,
+    state: TODO_STATES.find(state => state === value.state) ?? 'pending',
+    eta: optionalText(value.eta),
+  }
+
+  return todo
+}
+
+const readResource = (value: unknown) => {
+  if (!isRecord(value) || typeof value.label !== 'string' || typeof value.value !== 'string') {
+    return null
+  }
+
+  const resource: LaneResource = { label: value.label, value: value.value }
+
+  return resource
+}
 
 const readLane = (value: unknown) => {
   if (!isRecord(value)) {
     return null
   }
 
-  const { lane, ticket, title, stage } = value
-  const hasRequired = typeof lane === 'string' && typeof ticket === 'string' && typeof title === 'string'
-  if (!hasRequired || !isStage(stage)) {
+  const { lane, title, status } = value
+  if (typeof lane !== 'string' || typeof title !== 'string' || typeof status !== 'string') {
     return null
   }
 
-  const read: Omit<Lane, 'stageSince'> = {
+  const read: ReportedLane = {
     lane,
-    ticket,
     title,
-    stage,
+    status,
     agent: optionalText(value.agent),
-    branch: optionalText(value.branch),
     worktree: optionalText(value.worktree),
-    pr: optionalText(value.pr),
+    summary: optionalText(value.summary),
     eta: optionalText(value.eta),
-    note: optionalText(value.note),
+    todos: listOf(value.todos, readTodo),
+    resources: listOf(value.resources, readResource),
   }
 
   return read
 }
 
 /**
- * Read the arguments of a `report` call. Returns the reason when a field is missing or wrong.
+ * Read the arguments of a `report` call. Returns the reason when a required field is missing.
  */
 export const parseReport = (input: Record<string, unknown>): ReportParse => {
   const { program, lanes, needs, eta } = input
@@ -71,7 +95,7 @@ export const parseReport = (input: Record<string, unknown>): ReportParse => {
   const read = lanes.map(readLane)
   const badIndex = read.findIndex(lane => lane === null)
   if (badIndex >= 0) {
-    return { isValid: false, reason: `lanes[${badIndex}] needs lane, ticket, title, and a stage from: ${STAGES.join(', ')}.` }
+    return { isValid: false, reason: `lanes[${badIndex}] needs lane, title, and status as strings.` }
   }
 
   const report: Report = {

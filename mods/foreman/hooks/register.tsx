@@ -1,12 +1,12 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
-import type { AgentRow, Lane, SessionFile } from '../types'
+import type { AgentRow, Lane, SessionFile, Todo } from '../types'
 
 import { formatElapsed } from './elapsed'
-import { LSOF_ARGV, PS_ARGV, sampleLanes } from './lane-resources'
+import { CWD_ARGV, LISTEN_ARGV, PS_ARGV, sampleLanes } from './lane-processes'
 import { isProgramName, isSessionFile, mergeSessions } from './program-view'
-import { STAGES, parseReport } from './report-input'
+import { parseReport } from './report-input'
 
 const PANE = 'foreman'
 const PANE_TITLE = 'Foreman'
@@ -17,11 +17,13 @@ const SAMPLE_MS = 15000
 const LIVE_STATUSES = new Set(['pending', 'running', 'waiting', 'idle'])
 const DATA_FOLDER_ID = 'foreman-kodingdev'
 
+const TODO_MARKS = { done: '[x]', active: '[>]', pending: '[ ]' } as const satisfies Record<Todo['state'], string>
+
 const program = atom({ plugin: 'foreman', key: 'program' } as const, null)
 const own = atom({ plugin: 'foreman', key: 'own' } as const, null)
 const view = atom({ plugin: 'foreman', key: 'view' } as const, null)
 const programs = atom({ plugin: 'foreman', key: 'programs' } as const, [])
-const questions = atom({ plugin: 'foreman', key: 'questions' } as const, [])
+const waiting = atom({ plugin: 'foreman', key: 'waiting' } as const, [])
 const denials = atom({ plugin: 'foreman', key: 'denials' } as const, [])
 const tracking = atom({ plugin: 'foreman', key: 'tracking' } as const, {
   lastSeen: {},
@@ -34,27 +36,46 @@ const tracking = atom({ plugin: 'foreman', key: 'tracking' } as const, {
 const LANE_SCHEMA = {
   type: 'object',
   properties: {
-    lane: { type: 'string', description: 'Lane name, for example "rust-shader-port".' },
-    ticket: { type: 'string', description: 'Ticket identifier, for example "PSY-412".' },
-    title: { type: 'string', description: 'Ticket title.' },
-    stage: { type: 'string', enum: STAGES },
-    agent: { type: 'string', description: 'Name of the worker agent on this lane.' },
-    branch: { type: 'string' },
-    worktree: { type: 'string', description: 'Absolute path of the lane worktree. The mod measures memory and CPU under it.' },
-    pr: { type: 'string', description: 'The PR as "repo #123: title".' },
-    eta: { type: 'string', description: 'Estimate to done, for example "~40m".' },
-    note: { type: 'string', description: 'One short line: what happens now.' },
+    lane: { type: 'string', description: 'Short lane name, for example "rust-shader-port".' },
+    title: { type: 'string', description: 'What the lane delivers, for example "PSY-412: battle-pass logos".' },
+    status: { type: 'string', description: 'A few words on where the lane stands now, in your own terms.' },
+    agent: { type: 'string', description: 'Name of the agent that works the lane.' },
+    worktree: { type: 'string', description: 'Absolute path the lane works in. The mod measures memory, CPU, and listening ports under it.' },
+    summary: { type: 'string', description: 'One or two sentences of markdown: what the lane does now and why.' },
+    eta: { type: 'string', description: 'Rough estimate to done, for example "~40m".' },
+    todos: {
+      type: 'array',
+      description: 'The lane plan as small steps.',
+      items: {
+        type: 'object',
+        properties: {
+          text: { type: 'string' },
+          state: { type: 'string', enum: ['pending', 'active', 'done'] },
+          eta: { type: 'string', description: 'Rough estimate for this step.' },
+        },
+        required: ['text', 'state'],
+      },
+    },
+    resources: {
+      type: 'array',
+      description: 'Things the lane owns that the user may want to open: a dev server, a preview URL, a PR, a log file.',
+      items: {
+        type: 'object',
+        properties: { label: { type: 'string' }, value: { type: 'string' } },
+        required: ['label', 'value'],
+      },
+    },
   },
-  required: ['lane', 'ticket', 'title', 'stage'],
+  required: ['lane', 'title', 'status'],
 }
 
 const REPORT_SCHEMA = {
   type: 'object',
   properties: {
-    program: { type: 'string', description: 'The program name from the playbook. One lower-case path segment.' },
-    lanes: { type: 'array', items: LANE_SCHEMA, description: 'Every open lane, in priority order. Leave out lanes that are done.' },
+    program: { type: 'string', description: 'The program id. Every session on one program sends the same id. One lower-case path segment.' },
+    lanes: { type: 'array', items: LANE_SCHEMA, description: 'Every open lane. Leave out lanes that are done.' },
     needs: { type: 'array', items: { type: 'string' }, description: 'Each decision or review that waits on the user, one line each.' },
-    eta: { type: 'string', description: 'Estimate for the whole program.' },
+    eta: { type: 'string', description: 'Rough estimate for the whole program.' },
   },
   required: ['program', 'lanes'],
 }
@@ -63,13 +84,13 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'lanes',
-      description: 'Show a foreman program. Give a program name to switch, or "stop <lane>" to stop its worker.',
+      description: 'Show the lanes of a program. Give a program id to switch, or "stop <lane>" to stop its agent.',
       argumentHint: '[program | stop <lane>]',
     })
     await $.tool.register({
       name: 'report',
       description:
-        'Foreman status report. Send the full picture of your program after each stage change, PR, and decision that waits on the user. Each call replaces your last one.',
+        'Report the lanes of your program so the user can see them. Send the full picture after each meaningful change. Each call replaces your last one.',
       inputSchema: REPORT_SCHEMA,
     })
     $.clock.every(TICK_MS, () => void tick($))
@@ -102,7 +123,7 @@ export const register: Register = on => {
     await $.ui.open({ id: PANE, title: PANE_TITLE })
     const selected = await read($, program)
 
-    return { text: selected === null ? 'Foreman pane opened. No program yet: foreman picks one with its first report.' : `Foreman pane opened on ${selected}.` }
+    return { text: selected === null ? 'Lanes pane opened. No program yet: the first report picks one.' : `Lanes pane opened on ${selected}.` }
   })
 
   on('tool.call', { tool: 'mcp__foreman__report' }, async ($, e) => {
@@ -117,9 +138,9 @@ export const register: Register = on => {
     const previous = await read($, own)
     const lanes: Lane[] = report.lanes.map(lane => {
       const before = previous?.lanes.find(one => one.lane === lane.lane)
-      const stageSince = before?.stage === lane.stage ? before.stageSince : now
+      const statusSince = before?.status === lane.status ? before.statusSince : now
 
-      return { ...lane, stageSince }
+      return { ...lane, statusSince }
     })
 
     const file: SessionFile = {
@@ -130,7 +151,7 @@ export const register: Register = on => {
       needs: report.needs,
       eta: report.eta,
       agents: previous?.agents ?? [],
-      resources: previous?.resources ?? {},
+      usage: previous?.usage ?? {},
       totalRssGb: previous?.totalRssGb ?? 0,
     }
     await update($, own, () => file)
@@ -156,13 +177,13 @@ export const register: Register = on => {
 
     const question = e.tool === 'AskUserQuestion' && agentId !== undefined ? await describeQuestion($, agentId, e.questions) : null
     if (question !== null) {
-      await update($, questions, list => [...list, question])
+      await update($, waiting, list => [...list, question])
     }
 
     const ran = await next(e)
 
     if (question !== null) {
-      await update($, questions, list => list.filter(one => one !== question))
+      await update($, waiting, list => list.filter(one => one !== question))
     }
     if (ran.deny !== undefined) {
       const denial = { tool: String(e.tool), reason: ran.deny, at: now }
@@ -187,7 +208,7 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
     const current = await read($, view)
-    const asked = await read($, questions)
+    const asked = await read($, waiting)
     const denied = await read($, denials)
     const needs = [...(current?.needs ?? []), ...asked]
     const stalled = (current?.agents ?? []).filter(agent => agent.isStalled)
@@ -202,7 +223,7 @@ export const register: Register = on => {
     const items = [
       ...needs.map(need => `needs you: ${need}`),
       ...stalled.map(agent => `stalled: ${agent.name}`),
-      ...(lastDenial === undefined ? [] : [`${denied.length} permission denials (last: ${lastDenial.tool})`]),
+      ...(lastDenial === undefined ? [] : [`${countOf(denied.length, 'permission denial')} (last: ${lastDenial.tool})`]),
     ]
     const hiddenCount = items.length - 3
 
@@ -215,7 +236,7 @@ export const register: Register = on => {
         ))}
         <Box>
           {hiddenCount > 0 && <Text dimColor>+{hiddenCount} more </Text>}
-          <Button key="open" label="Open foreman" onPress={() => void $.ui.open({ id: PANE, title: PANE_TITLE })} />
+          <Button key="open" label="Open lanes" onPress={() => void $.ui.open({ id: PANE, title: PANE_TITLE })} />
           {denied.length > 0 && <Button key="clear" label="Clear denials" onPress={() => update($, denials, () => [])} />}
         </Box>
       </Box>
@@ -223,12 +244,12 @@ export const register: Register = on => {
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
-    const { Box, Button, Text } = $.ui.resolve(e)
+    const { Box, Button, Markdown, Text } = $.ui.resolve(e)
     const now = await $.clock.now()
     const selected = await read($, program)
     const current = await read($, view)
     const known = await read($, programs)
-    const asked = await read($, questions)
+    const asked = await read($, waiting)
     const denied = await read($, denials)
 
     const others = known.filter(name => name !== selected)
@@ -242,8 +263,8 @@ export const register: Register = on => {
       <Box flexDirection="column">
         <Text bold wrap="truncate-end">
           {selected ?? 'No program'}
-          {current !== null && <Text dimColor> · {countOf(current.sessionCount, 'session')}</Text>}
-          {current?.eta !== undefined && <Text> · ETA {current.eta}</Text>}
+          {current !== null && <Text dimColor> | {countOf(current.sessionCount, 'session')}</Text>}
+          {current?.eta !== undefined && <Text> | ETA {current.eta}</Text>}
         </Text>
         {others.length > 0 && (
           <Box>
@@ -254,32 +275,52 @@ export const register: Register = on => {
           </Box>
         )}
 
-        {lanes.length === 0 && <Text dimColor>No lanes. Foreman sends them with the report tool.</Text>}
+        {lanes.length === 0 && <Text dimColor>No lanes. Agents send them with the report tool.</Text>}
         {lanes.map(lane => {
           const worker = agents.find(agent => agent.name === lane.agent)
-          const used = current?.resources[lane.lane]
+          const used = current?.usage[lane.lane]
+          const doneCount = lane.todos.filter(todo => todo.state === 'done').length
+          const resources = [...lane.resources, ...(used?.ports ?? [])]
 
           return (
             <Box flexDirection="column" marginTop={1}>
               <Text wrap="truncate-end">
-                <Text color={stageColor(lane, worker)}>● </Text>
-                <Text bold>{lane.lane}</Text> {lane.ticket}: {lane.title}
+                <Text color={worker?.isStalled ? 'red' : 'green'}>* </Text>
+                <Text bold>{lane.lane}</Text> {lane.title}
               </Text>
               <Text dimColor wrap="truncate-end">
                 {'  '}
-                {lane.stage} {formatElapsed(now, lane.stageSince)}
-                {lane.eta !== undefined && ` · ETA ${lane.eta}`}
-                {worker !== undefined && ` · ${worker.name} ${worker.isStalled ? 'STALLED' : worker.status}, active ${formatElapsed(now, worker.lastSeen)} ago`}
+                {lane.status} | {formatElapsed(now, lane.statusSince)}
+                {lane.eta !== undefined && ` | ETA ${lane.eta}`}
+                {lane.todos.length > 0 && ` | ${doneCount}/${lane.todos.length} done`}
+                {worker !== undefined && ` | ${worker.name} ${worker.isStalled ? 'STALLED' : worker.status}, active ${formatElapsed(now, worker.lastSeen)} ago`}
               </Text>
+              {lane.summary !== undefined && (
+                <Box marginLeft={2}>
+                  <Markdown key={`summary-${lane.lane}`} text={lane.summary} />
+                </Box>
+              )}
+              {lane.todos.map(todo => (
+                <Text dimColor={todo.state === 'done'} wrap="truncate-end">
+                  {'  '}
+                  <Text color={todo.state === 'active' ? 'cyan' : undefined}>{TODO_MARKS[todo.state]}</Text> {todo.text}
+                  {todo.eta !== undefined && <Text dimColor> ({todo.eta})</Text>}
+                </Text>
+              ))}
+              {resources.map(resource => (
+                <Text wrap="truncate-end">
+                  {'  '}
+                  <Text dimColor>{resource.label}</Text> {resource.value}
+                  {resource.isObserved === true && <Text dimColor> (seen)</Text>}
+                </Text>
+              ))}
               {(used !== undefined || (worker?.tokenCount ?? 0) > 0) && (
                 <Text dimColor wrap="truncate-end">
                   {'  '}
-                  {used !== undefined && `${used.rssGb.toFixed(1)} GB · ${Math.round(used.cpuPercent)}% CPU · ${used.processCount} processes`}
-                  {worker !== undefined && worker.tokenCount > 0 && ` · ${formatTokens(worker.tokenCount)} tokens`}
+                  {used !== undefined && `${used.rssGb.toFixed(1)} GB | ${Math.round(used.cpuPercent)}% CPU | ${countOf(used.processCount, 'process', 'processes')}`}
+                  {worker !== undefined && worker.tokenCount > 0 && ` | ${formatTokens(worker.tokenCount)} tokens`}
                 </Text>
               )}
-              {lane.pr !== undefined && <Text dimColor wrap="truncate-end">{'  '}PR {lane.pr}</Text>}
-              {lane.note !== undefined && <Text dimColor wrap="truncate-end">{'  '}{lane.note}</Text>}
             </Box>
           )
         })}
@@ -288,7 +329,7 @@ export const register: Register = on => {
           <Box flexDirection="column" marginTop={1}>
             <Text bold>Needs you</Text>
             {needs.map(need => (
-              <Text color="yellow" wrap="truncate-end">• {need}</Text>
+              <Text color="yellow" wrap="truncate-end">- {need}</Text>
             ))}
           </Box>
         )}
@@ -298,7 +339,7 @@ export const register: Register = on => {
             <Text bold>Other agents</Text>
             {looseAgents.map(agent => (
               <Text color={agent.isStalled ? 'red' : undefined} dimColor={!agent.isStalled} wrap="truncate-end">
-                {agent.isStalled ? 'STALLED' : agent.status} {agent.name} · active {formatElapsed(now, agent.lastSeen)} ago
+                {agent.isStalled ? 'STALLED' : agent.status} {agent.name} | active {formatElapsed(now, agent.lastSeen)} ago
               </Text>
             ))}
           </Box>
@@ -338,13 +379,12 @@ const tick = async ($: EngineInterface) => {
 
   const agents: AgentRow[] = live.map(agent => {
     const seen = lastSeen[agent.id] ?? now
-    const isStalled = agent.status === 'running' && now - seen > STALL_MS
     const row: AgentRow = {
       id: agent.id,
       name: agent.name ?? agent.description,
       status: agent.status,
       lastSeen: seen,
-      isStalled,
+      isStalled: agent.status === 'running' && now - seen > STALL_MS,
       tokenCount: before.tokens[agent.id] ?? 0,
     }
 
@@ -353,21 +393,21 @@ const tick = async ($: EngineInterface) => {
 
   const newlyStalled = agents.filter(agent => agent.isStalled && !before.stallToasted.includes(agent.id))
   for (const agent of newlyStalled) {
-    $.ui.toast(`foreman: ${agent.name} has made no tool call for ${formatElapsed(now, agent.lastSeen)}`)
+    $.ui.toast(`lanes: ${agent.name} has made no tool call for ${formatElapsed(now, agent.lastSeen)}`)
   }
   const stallToasted = agents.filter(agent => agent.isStalled).map(agent => agent.id)
 
   const current = await read($, own)
   const shown = await read($, view)
   const isSampleDue = now - before.lastSampleAt >= SAMPLE_MS
-  const sampled = isSampleDue ? await sampleResources($, shown?.lanes ?? current?.lanes ?? []) : null
+  const sampled = isSampleDue ? await sampleProcesses($, shown?.lanes ?? current?.lanes ?? []) : null
 
   const heaviest = sampled?.heaviest ?? null
   const heavyKey = heaviest === null ? '' : `${heaviest.pid}`
   const isNewHeavy = heaviest !== null && heaviest.rssGb >= HEAVY_GB && !before.heavyToasted.includes(heavyKey)
   if (isNewHeavy) {
     const where = heaviest.lane === null ? `process ${heaviest.pid}` : `lane ${heaviest.lane} (process ${heaviest.pid})`
-    $.ui.toast(`foreman: ${where} uses ${heaviest.rssGb.toFixed(0)} GB of memory`)
+    $.ui.toast(`lanes: ${where} uses ${heaviest.rssGb.toFixed(0)} GB of memory`)
   }
 
   await update($, tracking, latest => ({
@@ -383,7 +423,7 @@ const tick = async ($: EngineInterface) => {
       ...current,
       updatedAt: now,
       agents,
-      resources: sampled?.lanes ?? current.resources,
+      usage: sampled?.lanes ?? current.usage,
       totalRssGb: sampled?.totalRssGb ?? current.totalRssGb,
     }
     await update($, own, () => file)
@@ -401,7 +441,7 @@ const refreshView = async ($: EngineInterface, now: number, ownAgents?: AgentRow
 
   if (selected === null) {
     const agents = ownAgents ?? []
-    await update($, view, () => (agents.length === 0 ? null : { program: '', sessionCount: 1, lanes: [], needs: [], agents, resources: {}, totalRssGb: 0 }))
+    await update($, view, () => (agents.length === 0 ? null : { program: '', sessionCount: 1, lanes: [], needs: [], agents, usage: {}, totalRssGb: 0 }))
     return
   }
 
@@ -409,19 +449,22 @@ const refreshView = async ($: EngineInterface, now: number, ownAgents?: AgentRow
   await update($, view, () => mergeSessions(selected, files, now))
 }
 
-const sampleResources = async ($: EngineInterface, lanes: Lane[]) => {
+const sampleProcesses = async ($: EngineInterface, lanes: Lane[]) => {
   const worktrees = Object.fromEntries(lanes.flatMap(lane => (lane.worktree === undefined ? [] : [[lane.lane, lane.worktree] as const])))
-  const [ps, lsof] = await Promise.all([$.process.run(PS_ARGV), $.process.run(LSOF_ARGV)])
-  if (ps.exitCode !== 0) {
+  const runs = await Promise.all([$.process.run(PS_ARGV), $.process.run(CWD_ARGV), $.process.run(LISTEN_ARGV)]).catch(() => {
+    // A host without ps or lsof (Windows) cannot start them. The pane then shows no usage lines.
+    return null
+  })
+  if (runs === null || runs[0].exitCode !== 0) {
     return null
   }
 
-  return sampleLanes(ps.stdout, lsof.stdout, worktrees)
+  return sampleLanes(runs[0].stdout, runs[1].stdout, runs[2].stdout, worktrees)
 }
 
 const selectProgram = async ($: EngineInterface, name: string) => {
   if (!isProgramName(name)) {
-    return `"${name}" is not a program name. Program names are one lower-case path segment.`
+    return `"${name}" is not a program id. Program ids are one lower-case path segment.`
   }
 
   const known = await listPrograms($)
@@ -432,7 +475,7 @@ const selectProgram = async ($: EngineInterface, name: string) => {
   await update($, program, () => name)
   await refreshView($, await $.clock.now())
 
-  return `Foreman pane now shows ${name}.`
+  return `Lanes pane now shows ${name}.`
 }
 
 const stopLane = async ($: EngineInterface, laneName: string) => {
@@ -442,7 +485,7 @@ const stopLane = async ($: EngineInterface, laneName: string) => {
     return `No lane "${laneName}" in this program.`
   }
   if (lane.agent === undefined) {
-    return `Lane ${laneName} reports no worker agent, so there is nothing to stop.`
+    return `Lane ${laneName} reports no agent, so there is nothing to stop.`
   }
 
   const stopped = await $.tool.call({ tool: 'TaskStop', task_id: lane.agent })
@@ -450,11 +493,7 @@ const stopLane = async ($: EngineInterface, laneName: string) => {
     return `Could not stop ${lane.agent}: ${stopped.deny}`
   }
 
-  await $.session.append({
-    message: { type: 'user', content: [{ type: 'text', text: `The user stopped worker ${lane.agent} on lane ${laneName} with /lanes stop.` }] },
-  })
-
-  return `Stopped ${lane.agent} on lane ${laneName}. Foreman knows.`
+  return `The user stopped agent ${lane.agent} on lane ${laneName}. Re-plan that lane.`
 }
 
 const statusLine = async ($: EngineInterface) => {
@@ -465,7 +504,7 @@ const statusLine = async ($: EngineInterface) => {
   }
 
   const stalledCount = current.agents.filter(agent => agent.isStalled).length
-  const asked = await read($, questions)
+  const asked = await read($, waiting)
   const needCount = current.needs.length + asked.length
   const parts = [
     selected ?? 'no program',
@@ -477,13 +516,13 @@ const statusLine = async ($: EngineInterface) => {
     current.totalRssGb > 0 ? `RAM ${current.totalRssGb.toFixed(0)}G` : '',
   ]
 
-  return parts.filter(part => part.length > 0).join(' · ')
+  return parts.filter(part => part.length > 0).join(' | ')
 }
 
 const describeQuestion = async ($: EngineInterface, agentId: string, asked: Array<{ question: string }>) => {
   const listed = await $.agent.list()
   const agent = listed.find(one => one.id === agentId)
-  const who = agent?.name ?? agent?.description ?? 'a worker'
+  const who = agent?.name ?? agent?.description ?? 'an agent'
   const first = asked[0]?.question ?? 'a question'
 
   return `${who} asks: ${first}`
@@ -509,7 +548,10 @@ const listPrograms = async ($: EngineInterface) => {
 
   const entries = await $.fs.list(root)
 
-  return entries.filter(entry => entry.kind === 'dir' && isProgramName(entry.name)).map(entry => entry.name).sort()
+  return entries
+    .filter(entry => entry.kind === 'dir' && isProgramName(entry.name))
+    .map(entry => entry.name)
+    .sort()
 }
 
 const readProgramFiles = async ($: EngineInterface, name: string) => {
@@ -520,9 +562,7 @@ const readProgramFiles = async ($: EngineInterface, name: string) => {
   }
 
   const entries = await $.fs.list(folder)
-  const texts = await Promise.all(
-    entries.filter(entry => entry.name.endsWith('.json')).map(entry => $.fs.read(`${folder}/${entry.name}`)),
-  )
+  const texts = await Promise.all(entries.filter(entry => entry.name.endsWith('.json')).map(entry => $.fs.read(`${folder}/${entry.name}`)))
 
   return texts.flatMap(text => {
     const parsed = parseJson(text)
@@ -544,20 +584,6 @@ const parseJson = (text: string): unknown => {
   }
 }
 
-const stageColor = (lane: Lane, worker: AgentRow | undefined) => {
-  if (worker?.isStalled || lane.stage === 'blocked') {
-    return 'red'
-  }
-  if (lane.stage === 'pr' || lane.stage === 'feedback') {
-    return 'yellow'
-  }
+const countOf = (count: number, noun: string, plural = `${noun}s`) => `${count} ${count === 1 ? noun : plural}`
 
-  return 'green'
-}
-
-const countOf = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`
-
-const formatTokens = (count: number) => {
-  return count >= 1_000_000 ? `${(count / 1_000_000).toFixed(1)}M` : `${Math.round(count / 1000)}k`
-}
-
+const formatTokens = (count: number) => (count >= 1_000_000 ? `${(count / 1_000_000).toFixed(1)}M` : `${Math.round(count / 1000)}k`)

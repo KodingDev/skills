@@ -8,7 +8,7 @@ const PROGRAMS = `${HOME}/.claude/plugins/data/foreman-kodingdev/programs`
 const SESSION_ID = 'session-a'
 const START = 1_000_000
 
-const LANE = { lane: 'rust-port', ticket: 'PSY-1', title: 'Port the shader', stage: 'execute', agent: 'rusty' } as const
+const LANE = { lane: 'rust-port', title: 'PSY-1: Port the shader', status: 'porting', agent: 'rusty' } as const
 const SITE = { bodyColumns: 80, scroll: { offset: 0, bodyRows: 40 }, view: {} }
 const PANE = {
   component: 'Pane',
@@ -24,10 +24,10 @@ const PEER_FILE: SessionFile = {
   sessionId: 'session-b',
   program: 'niagara',
   updatedAt: START,
-  lanes: [{ lane: 'webgl-runtime', ticket: 'PSY-2', title: 'WebGL runtime', stage: 'pr', stageSince: START }],
+  lanes: [{ lane: 'webgl-runtime', title: 'PSY-2: WebGL runtime', status: 'in review', statusSince: START, todos: [], resources: [] }],
   needs: ['Review frontend #12: WebGL runtime'],
   agents: [],
-  resources: {},
+  usage: {},
   totalRssGb: 0,
 }
 
@@ -75,16 +75,16 @@ test('a report joins the lanes of every live session on the same program', async
   await pane.unmount()
 })
 
-test('a lane keeps its stage age across reports in the same stage', async ($, on) => {
+test('a lane keeps its status age across reports with the same status', async ($, on) => {
   const { clock } = world(on)
   await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [LANE] })
   await clock.advance(30 * 60 * 1000)
-  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [{ ...LANE, note: 'tests green' }] })
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [{ ...LANE, summary: 'Tests **green** on the port.' }] })
 
   for (const surface of ['terminal', 'desktop'] as const) {
     const pane = await $.ui.mount({ plugin: 'foreman', surface, ...PANE })
-    expect(await pane.find({ type: 'Text', text: /execute 30m/ })).toBeDefined()
-    expect(await pane.find({ type: 'Text', text: /tests green/ })).toBeDefined()
+    expect(await pane.find({ type: 'Text', text: /porting \| 30m/ })).toBeDefined()
+    expect(await pane.find({ type: 'Markdown', key: 'summary-rust-port' })).toBeDefined()
     await pane.unmount()
   }
 })
@@ -101,11 +101,29 @@ test('the pane switches to another program and shows only that program', async (
   await pane.unmount()
 })
 
-test('a report with an unknown stage is refused with the reason', async ($, on) => {
+test('a report with a lane that has no status is refused with the reason', async ($, on) => {
   world(on)
-  const answer = await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [{ ...LANE, stage: 'coding' }] })
+  const answer = await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [{ lane: 'rust-port', title: 'PSY-1: Port the shader' }] })
 
-  expect(answer.text).toMatch(/lanes\[0\] needs .* a stage from/)
+  expect(answer.text).toMatch(/lanes\[0\] needs lane, title, and status/)
+})
+
+test('a lane shows its todos with progress and the resources its agent labeled', async ($, on) => {
+  world(on)
+  const todos = [
+    { text: 'Write the failing test', state: 'done' },
+    { text: 'Port the bloom pass', state: 'active', eta: '~20m' },
+    { text: 'Open the PR', state: 'pending' },
+  ]
+  const resources = [{ label: 'dev server', value: 'http://localhost:5173' }]
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [{ ...LANE, todos, resources }] })
+
+  const pane = await $.ui.mount({ plugin: 'foreman', surface: 'terminal', ...PANE })
+  expect(await pane.find({ type: 'Text', text: /1\/3 done/ })).toBeDefined()
+  expect(await pane.find({ type: 'Text', text: /\[>\] Port the bloom pass/ })).toBeDefined()
+  expect(await pane.find({ type: 'Text', text: /~20m/ })).toBeDefined()
+  expect(await pane.find({ type: 'Text', text: /dev server http:\/\/localhost:5173/ })).toBeDefined()
+  await pane.unmount()
 })
 
 test('the band lists what needs the user and hides when nothing does', async ($, on) => {
@@ -135,6 +153,6 @@ test('a denied tool call shows in the band', async ($, on) => {
   await $.tool.call({ tool: 'Bash', command: 'rm -rf build' })
 
   const band = await $.ui.mount({ plugin: 'foreman', surface: 'terminal', ...BAND })
-  expect(await band.find({ type: 'Text', text: /1 permission denials \(last: Bash\)/ })).toBeDefined()
+  expect(await band.find({ type: 'Text', text: /1 permission denial \(last: Bash\)/ })).toBeDefined()
   await band.unmount()
 })

@@ -1,23 +1,35 @@
 /**
- * The lane stages that foreman reports, in loop order.
+ * One step a lane's agent plans, with its own rough estimate.
  */
-export type Stage = 'pick' | 'branch' | 'brief' | 'execute' | 'self-review' | 'pr' | 'feedback' | 'merge' | 'blocked'
+export type Todo = {
+  text: string
+  state: 'pending' | 'active' | 'done'
+  eta?: string
+}
 
 /**
- * One lane as foreman reports it, plus the time its current stage started.
+ * Something a lane owns, labeled by its agent or found by the mod: a dev server, a port, a PR, a log.
+ */
+export type LaneResource = {
+  label: string
+  value: string
+  isObserved?: boolean
+}
+
+/**
+ * One lane as its agent reports it, plus the time its status last changed.
  */
 export type Lane = {
   lane: string
-  ticket: string
   title: string
-  stage: Stage
+  status: string
+  statusSince: number
   agent?: string
-  branch?: string
   worktree?: string
-  pr?: string
+  summary?: string
   eta?: string
-  note?: string
-  stageSince: number
+  todos: Todo[]
+  resources: LaneResource[]
 }
 
 /**
@@ -33,12 +45,13 @@ export type AgentRow = {
 }
 
 /**
- * Memory and CPU of the processes that run inside one lane's worktree.
+ * What the mod measures for the processes that run inside one lane's worktree.
  */
-export type LaneResources = {
+export type LaneUsage = {
   rssGb: number
   cpuPercent: number
   processCount: number
+  ports: LaneResource[]
 }
 
 /**
@@ -52,7 +65,7 @@ export type SessionFile = {
   needs: string[]
   eta?: string
   agents: AgentRow[]
-  resources: Record<string, LaneResources>
+  usage: Record<string, LaneUsage>
   totalRssGb: number
 }
 
@@ -66,7 +79,7 @@ export type ProgramView = {
   needs: string[]
   eta?: string
   agents: AgentRow[]
-  resources: Record<string, LaneResources>
+  usage: Record<string, LaneUsage>
   totalRssGb: number
 }
 
@@ -97,7 +110,7 @@ declare module 'claude-code' {
       own: SessionFile | null
       view: ProgramView | null
       programs: string[]
-      questions: string[]
+      waiting: string[]
       denials: Denial[]
       tracking: Tracking
     }
