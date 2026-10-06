@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Run one Codex round in a linked git worktree, and record it on disk.
 #
-#   codex-run.sh --worktree DIR --brief FILE [--resume] [--model M] [--effort E]
+#   codex-run.sh --worktree DIR --brief FILE [--resume] [--detach] [--model M] [--effort E]
+#
+# --detach starts the round in the background, prints its folder, and exits 0.
+# codex-wait.sh then blocks until the round ends.
 #
 # A round writes to $USING_CODEX_HOME/<worktree name>/<UTC stamp>/:
 #   brief.md    the brief as sent
@@ -14,12 +17,13 @@ set -euo pipefail
 
 die() { echo "codex-run: $*" >&2; exit 2; }
 
-worktree="" brief="" resume=0 model="${USING_CODEX_MODEL:-}" effort=""
+worktree="" brief="" resume=0 detach=0 model="${USING_CODEX_MODEL:-}" effort=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --worktree) worktree="${2:?}"; shift 2 ;;
     --brief) brief="${2:?}"; shift 2 ;;
     --resume) resume=1; shift ;;
+    --detach) detach=1; shift ;;
     --model) model="${2:?}"; shift 2 ;;
     --effort) effort="${2:?}"; shift 2 ;;
     *) die "unknown argument: $1" ;;
@@ -28,6 +32,10 @@ done
 [ -n "$worktree" ] || die "--worktree is required"
 [ -f "$brief" ] || die "brief not found: $brief"
 command -v codex >/dev/null || die "codex is not on PATH"
+# A brief that still holds the template's own guidance was not filled in.
+if grep -qE '^(One or two sentences|The reason for the change|Numbered steps, in order|The checkable condition)' "$brief"; then
+  die "$brief still holds template text from brief.md; fill in every section"
+fi
 
 worktree="$(cd "$worktree" && pwd -P)"
 git_dir="$(git -C "$worktree" rev-parse --absolute-git-dir)" || die "not a git checkout: $worktree"
@@ -67,6 +75,8 @@ fi
 
 head_before="$(git -C "$worktree" rev-parse HEAD)"
 echo "codex-run: round $run on $branch" >&2
+
+finish() {
 set +e
 (cd "$worktree" && "${cmd[@]}" < "$run/brief.md" > "$run/events.jsonl" 2> "$run/stderr.log")
 code=$?
@@ -86,3 +96,11 @@ echo "exit $code" > "$run/status"
 echo "codex-run: exit $code; final message in $run/last.md; worktree changes:" >&2
 cat "$run/diffstat" >&2
 exit "$code"
+}
+
+if [ "$detach" = 1 ]; then
+  (trap '' HUP; finish) > "$run/runner.log" 2>&1 < /dev/null &
+  echo "$run"
+  exit 0
+fi
+finish

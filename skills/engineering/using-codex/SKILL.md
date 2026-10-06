@@ -10,24 +10,25 @@ description: >
 
 Codex writes the code and the tests. You own everything around it: the worktree, the brief, the review, the checks, the commits, and all prose (docs, commit messages, pull request text).
 
-Every round goes through [`scripts/codex-run.sh`](scripts/codex-run.sh). Run it from this skill's folder. It refuses the main checkout, a detached HEAD, and the default branch. It keeps Codex in the `workspace-write` sandbox, and it records each round on disk.
+Every round goes through [`scripts/codex-run.sh`](scripts/codex-run.sh). Call the scripts by their absolute path in this skill's folder. It refuses the main checkout, a detached HEAD, and the default branch. It keeps Codex in the `workspace-write` sandbox, and it records each round on disk.
 
 ## Steps
 
 1. **Worktree.** Create a linked worktree on a feature branch for the task: `git worktree add <path> -b <branch>`. Codex works only there.
    Done when: `git -C <path> branch --show-current` prints the feature branch.
 
-2. **Brief.** Copy [`brief.md`](brief.md) to a file outside the repo, and fill in every section. Paste the facts Codex needs. Codex has no memory of your conversation.
-   Done when: every section has content, and every path is absolute.
+2. **Brief.** Copy [`brief.md`](brief.md) to a file outside the repo, and fill in every section. Paste the facts Codex needs. Codex has no memory of your conversation. Write the file with your file-write tool. A shell heredoc runs the backticks and `$` in it, and the brief reaches Codex with holes.
+   Done when: every section has content, and every path is absolute. The script refuses a brief that still holds template text.
 
 3. **Round.** Run:
 
    ```sh
-   scripts/codex-run.sh --worktree <path> --brief <brief file> [--model <m>] [--effort <low|medium|high>]
+   scripts/codex-run.sh --worktree <path> --brief <brief file> --detach [--model <m>] [--effort <low|medium|high>]
+   scripts/codex-wait.sh <round folder>...
    ```
 
-   A round can take longer than your tool's foreground limit. Then start the same command as a background job, and wait for its completion notice. To check a running round, read its `status` file.
-   Done when: the round's `status` file says `exit <code>`.
+   `--detach` prints the round folder and returns at once. Run `codex-wait.sh` as a background command: it ends when every round it names ends, and its completion notice wakes you. One wait can cover the rounds of several worktrees. Do other work in the meantime.
+   Done when: `codex-wait.sh` printed `exit <code>` for the round.
 
 4. **Result.** The script prints the round folder. Read `status`, then the diff itself (`git -C <path> diff`). `last.md` is Codex's own summary: use it for open questions, not as evidence.
 
@@ -49,4 +50,4 @@ Every round goes through [`scripts/codex-run.sh`](scripts/codex-run.sh). Run it 
 
 ## Round files
 
-Each round writes to `$USING_CODEX_HOME/<worktree folder>/<UTC stamp>/` (default `~/.cache/using-codex`): `brief.md`, `events.jsonl`, `stderr.log`, `last.md`, `session`, `status`, and `diffstat`. `--resume` reads `session` from the newest round of the same worktree.
+Each round writes to `$USING_CODEX_HOME/<worktree folder>/<UTC stamp>/` (default `~/.cache/using-codex`): `brief.md`, `events.jsonl`, `stderr.log`, `last.md`, `session`, `status`, `diffstat`, and `runner.log` for a detached round. `--resume` reads `session` from the newest round of the same worktree.
