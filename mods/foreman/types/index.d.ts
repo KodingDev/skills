@@ -24,6 +24,7 @@ export type Lane = {
   title: string
   status: string
   statusSince: number
+  reportedAt: number
   agent?: string
   worktree?: string
   summary?: string

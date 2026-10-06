@@ -3,9 +3,9 @@ import type { Lane, LaneResource, Todo } from '../types'
 import { isProgramName } from './program-view'
 
 /**
- * A lane as an agent reports it, before the mod adds the time its status changed.
+ * A lane as an agent reports it, before the mod adds when its status changed and when it was sent.
  */
-export type ReportedLane = Omit<Lane, 'statusSince'>
+export type ReportedLane = Omit<Lane, 'statusSince' | 'reportedAt'>
 
 /**
  * A report as an agent sends it.

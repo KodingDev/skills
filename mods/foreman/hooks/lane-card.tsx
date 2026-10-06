@@ -11,6 +11,10 @@ import { progressBar } from './progress-bar'
 export type CardElements = Pick<ElementTable, 'Box' | 'Markdown' | 'Text'>
 
 const PROGRESS_WIDTH = 20
+/**
+ * Plain words for the agent statuses that read as stuck. A teammate is `idle` while a background job runs.
+ */
+export const AGENT_STATUS_LABELS: Record<string, string> = { idle: 'waiting', running: 'working' }
 const TODO_MARKS = { done: '[x]', active: '>', pending: '-' } as const satisfies Record<Todo['state'], string>
 
 /**
@@ -22,7 +26,8 @@ const formatTokens = (count: number) => (count >= 1_000_000 ? `${(count / 1_000_
 
 /**
  * Draw one lane as a bordered card: header, status, progress, summary, open todos, resources, and a
- * usage footer. The border is red while the lane's agent is stalled.
+ * usage footer. The border is red while the lane's agent is stalled. A lane that names an agent with
+ * no live run is drawn dim as ended.
  *
  * @param labelWidth the width that aligns resource labels across every card
  */
@@ -38,14 +43,17 @@ export const laneCard = (
   const openTodos = lane.todos.filter(todo => todo.state !== 'done')
   const resources = [...lane.resources, ...(used?.ports ?? [])]
   const isStalled = worker?.isStalled === true
+  const hasEnded = lane.agent !== undefined && worker === undefined
+  const workerState = isStalled ? 'stalled' : (AGENT_STATUS_LABELS[worker?.status ?? ''] ?? worker?.status)
   const footer = [
-    worker === undefined ? '' : `${worker.name} ${isStalled ? 'stalled' : worker.status}, active ${formatElapsed(now, worker.lastSeen)} ago`,
+    hasEnded ? `${lane.agent} ended; /lanes close ${lane.lane} removes the lane` : '',
+    worker === undefined ? '' : `${worker.name} ${workerState}, active ${formatElapsed(now, worker.lastSeen)} ago`,
     used === undefined ? '' : `${used.rssGb.toFixed(1)} GB  ${Math.round(used.cpuPercent)}% CPU  ${countOf(used.processCount, 'process', 'processes')}`,
     worker === undefined || worker.tokenCount === 0 ? '' : `${formatTokens(worker.tokenCount)} tokens`,
   ].filter(part => part.length > 0)
 
   return (
-    <Box key={`lane-${lane.lane}`} flexDirection="column" borderStyle="round" borderColor={isStalled ? 'red' : 'gray'} paddingX={1}>
+    <Box key={`lane-${lane.lane}`} flexDirection="column" borderStyle="round" borderColor={isStalled ? 'red' : 'gray'} borderDimColor={hasEnded} paddingX={1}>
       <Box justifyContent="space-between">
         <Text wrap="truncate-end">
           <Text bold>{lane.lane}</Text>
@@ -54,8 +62,13 @@ export const laneCard = (
         {lane.eta !== undefined && <Text color="cyan">{lane.eta}</Text>}
       </Box>
       <Text wrap="truncate-end">
-        <Text color={isStalled ? 'red' : 'green'}>{lane.status}</Text>
-        <Text dimColor>  for {formatElapsed(now, lane.statusSince)}</Text>
+        <Text color={isStalled ? 'red' : 'green'} dimColor={hasEnded}>
+          {lane.status}
+        </Text>
+        <Text dimColor>
+          {'  '}
+          for {formatElapsed(now, lane.statusSince)}, updated {formatElapsed(now, lane.reportedAt)} ago
+        </Text>
       </Text>
       {lane.todos.length > 0 && (
         <Text>

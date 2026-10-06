@@ -14,8 +14,9 @@ claude plugin install foreman@kodingdev
 ## Use
 
 - `/lanes` opens the pane on the current program.
-- `/lanes <program>` switches the pane to another program.
+- `/lanes <program>` switches the pane to another program. Until you switch, the pane follows the program of this session's latest report.
 - `/lanes stop <lane>` stops the agent of that lane.
+- `/lanes close <lane>` removes a lane from this session's report.
 
 The band above the prompt lists what needs you, stalled agents, and permission denials. The status line shows the lane count, stalls, needs, and the ETA. Both hide when nothing is open.
 
@@ -33,6 +34,8 @@ The [`foreman`](../../skills/engineering/foreman/SKILL.md) skill tells its agent
 
 ## What it observes
 
+- **Ended agents**: a lane that names an agent with no live run is drawn dim, with a hint to close it.
+- **Stale reports**: when open lanes have no report for 20 minutes, the system prompt asks the agent for one.
 - **Stalls**: a running subagent with no tool call for 10 minutes. A toast tells you once.
 - **Usage per lane**: the memory, CPU, and process count of every process whose working folder is inside the lane's `worktree`, with its children. The session's own processes do not count.
 - **Ports**: each TCP port that a lane process listens on, marked `seen`.

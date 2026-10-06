@@ -24,7 +24,7 @@ const PEER_FILE: SessionFile = {
   sessionId: 'session-b',
   program: 'niagara',
   updatedAt: START,
-  lanes: [{ lane: 'webgl-runtime', title: 'PSY-2: WebGL runtime', status: 'in review', statusSince: START, todos: [], resources: [] }],
+  lanes: [{ lane: 'webgl-runtime', title: 'PSY-2: WebGL runtime', status: 'in review', statusSince: START, reportedAt: START, todos: [], resources: [] }],
   needs: ['Review frontend #12: WebGL runtime'],
   agents: [],
   usage: {},
@@ -226,4 +226,47 @@ test('a report patches the lanes it names, closes the lanes it lists, and keeps 
   expect(await pane.find({ type: 'Text', text: /PSY-3: Docs/ })).toBeUndefined()
   expect(await pane.find({ type: 'Text', text: /Approve PR #12/ })).toBeDefined()
   await pane.unmount()
+})
+
+test('a lane whose agent has no live run shows as ended, and /lanes close removes it', async ($, on) => {
+  world(on)
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [LANE] })
+
+  const pane = await $.ui.mount({ plugin: 'foreman', surface: 'terminal', ...PANE })
+  expect(await pane.find({ type: 'Text', text: /rusty ended/ })).toBeDefined()
+
+  await $.command.run({ command: 'lanes', args: 'close rust-port', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } })
+  expect(await pane.find({ type: 'Text', text: /PSY-1: Port the shader/ })).toBeUndefined()
+  await pane.unmount()
+})
+
+test('the pane follows the program of the latest report until the user switches', async ($, on) => {
+  world(on)
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [LANE] })
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'billing', lanes: [{ ...LANE, title: 'PSY-9: Billing' }] })
+
+  const pane = await $.ui.mount({ plugin: 'foreman', surface: 'terminal', ...PANE })
+  expect(await pane.find({ type: 'Text', text: /PSY-9: Billing/ })).toBeDefined()
+  await pane.unmount()
+})
+
+test('the system prompt asks for a report only while open lanes have gone 20 minutes without one', async ($, on) => {
+  const { clock } = world(on)
+  on('prompt.compose', () => ({ sections: [] }))
+  await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [LANE] })
+  const composeInput = { model: 'test', promptModel: 'test', surfaces: ['terminal'], tools: [], outputStyle: null, traits: [] } as const
+
+  const fresh = await $.prompt.compose(composeInput)
+  await clock.advance(21 * 60 * 1000)
+  const stale = await $.prompt.compose(composeInput)
+
+  expect(fresh.sections.map(section => section.id)).toEqual([])
+  expect(stale.sections.map(section => section.id)).toEqual(['foreman:report-stale'])
+})
+
+test('the report answer names the open lanes that have no eta', async ($, on) => {
+  world(on)
+  const answer = await $.tool.call({ tool: 'mcp__foreman__report', program: 'niagara', lanes: [LANE, { ...LANE, lane: 'webgl', eta: '~1h' }] })
+
+  expect(answer.text).toBe('niagara: 2 open lanes, 0 needs. No eta yet: rust-port.')
 })

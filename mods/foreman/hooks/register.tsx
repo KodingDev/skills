@@ -4,7 +4,7 @@ import type { EngineInterface, Register } from 'claude-code'
 import type { AgentRow, Lane, SessionFile } from '../types'
 
 import { formatElapsed } from './elapsed'
-import { countOf, laneCard } from './lane-card'
+import { AGENT_STATUS_LABELS, countOf, laneCard } from './lane-card'
 import { CWD_ARGV, LISTEN_ARGV, PS_ARGV, sampleLanes } from './lane-processes'
 import { isProgramName, isSessionFile, mergeSessions } from './program-view'
 import { parseReport } from './report-input'
@@ -21,6 +21,12 @@ const HEARTBEAT_MS = 60 * 1000
 const SEEN_THROTTLE_MS = 1000
 const PROGRAM_STALE_MS = 24 * 60 * 60 * 1000
 const MAIN_ID = 'main'
+const REPORT_STALE_MS = 20 * 60 * 1000
+const NUDGE = {
+  id: 'foreman:report-stale',
+  text: 'Your last foreman report is over 20 minutes old and lanes are open. Send mcp__foreman__report with what changed, and close lanes that are done.',
+  scope: 'session',
+} as const
 
 const program = atom({ plugin: 'foreman', key: 'program' } as const, null)
 const own = atom({ plugin: 'foreman', key: 'own' } as const, null)
@@ -47,7 +53,7 @@ const LANE_SCHEMA = {
     agent: { type: 'string', description: 'Name of the agent that works the lane.' },
     worktree: { type: 'string', description: 'Absolute path the lane works in. The mod measures memory, CPU, and listening ports under it.' },
     summary: { type: 'string', description: 'One or two sentences of markdown: what the lane does now and why.' },
-    eta: { type: 'string', description: 'Rough estimate to done, for example "~40m".' },
+    eta: { type: 'string', description: 'Send on every lane: a rough time to done, a few characters, for example "~40m" or "~19:00". Update it when it moves.' },
     todos: {
       type: 'array',
       description: 'The lane plan as small steps.',
@@ -56,7 +62,7 @@ const LANE_SCHEMA = {
         properties: {
           text: { type: 'string' },
           state: { type: 'string', enum: ['pending', 'active', 'done'] },
-          eta: { type: 'string', description: 'Rough estimate for this step.' },
+          eta: { type: 'string', description: 'Rough time for this step, for example "~10m".' },
         },
         required: ['text', 'state'],
       },
@@ -81,7 +87,7 @@ const REPORT_SCHEMA = {
     lanes: { type: 'array', items: LANE_SCHEMA, description: 'Only the lanes that changed. Each one replaces the lane of the same name; other lanes stay.' },
     closed: { type: 'array', items: { type: 'string' }, description: 'Names of lanes that are done. They leave the view.' },
     needs: { type: 'array', items: { type: 'string' }, description: 'Each decision or review that waits on the user now, one line each. Replaces the last list; leave it out to keep it, send [] when nothing waits. Put later plans in a todo.' },
-    eta: { type: 'string', description: 'Rough estimate for the whole program.' },
+    eta: { type: 'string', description: 'A rough time to done for the whole program, a few characters, for example "~3h". Status and plans go in lanes.' },
   },
   required: ['program'],
 }
@@ -90,8 +96,8 @@ export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
       name: 'lanes',
-      description: 'Show the lanes of a program. Give a program id to switch, or "stop <lane>" to stop its agent.',
-      argumentHint: '[program | stop <lane>]',
+      description: 'Show the lanes of a program. Give a program id to switch, "stop <lane>" to stop its agent, or "close <lane>" to remove it.',
+      argumentHint: '[program | stop <lane> | close <lane>]',
     })
     await $.tool.register({
       name: 'report',
@@ -119,6 +125,9 @@ export const register: Register = on => {
 
     if (verb === 'stop') {
       return { text: await stopLane($, rest.join(' ')) }
+    }
+    if (verb === 'close') {
+      return { text: await closeLane($, rest.join(' ')) }
     }
     if (verb.length > 0) {
       const answer = await selectProgram($, verb)
@@ -149,7 +158,7 @@ export const register: Register = on => {
       const before = previous?.lanes.find(one => one.lane === lane.lane)
       const statusSince = before?.status === lane.status ? before.statusSince : now
 
-      return { ...lane, statusSince }
+      return { ...lane, statusSince, reportedAt: now }
     })
     const sentNames = new Set(sent.map(lane => lane.lane))
     const lanes = [...kept.filter(lane => !sentNames.has(lane.lane)), ...sent]
@@ -167,13 +176,17 @@ export const register: Register = on => {
     }
     await saveSessionFile($, file, true)
 
+    // The pane follows this session's own program until the user picks another one.
     const selected = await read($, program)
-    if (selected === null) {
+    const isFollowing = selected === null || selected === previous?.program
+    if (isFollowing) {
       await update($, program, () => report.program)
     }
     await refreshView($, now)
 
-    const text = `${report.program}: ${countOf(lanes.length, 'open lane')}, ${countOf(file.needs.length, 'need')}.`
+    const missingEta = lanes.filter(lane => lane.eta === undefined).map(lane => lane.lane)
+    const etaHint = missingEta.length === 0 ? '' : ` No eta yet: ${missingEta.join(', ')}.`
+    const text = `${report.program}: ${countOf(lanes.length, 'open lane')}, ${countOf(file.needs.length, 'need')}.${etaHint}`
 
     return { result: text, text }
   })
@@ -218,6 +231,19 @@ export const register: Register = on => {
     }
 
     return next(e)
+  })
+
+  on('prompt.compose', async ($, e, next) => {
+    const composed = await next(e)
+    const current = await read($, own)
+    const now = await $.clock.now()
+    const lastReportAt = Math.max(0, ...(current?.lanes ?? []).map(lane => lane.reportedAt))
+    const isStale = current !== null && current.lanes.length > 0 && now - lastReportAt > REPORT_STALE_MS
+    if (!isStale) {
+      return composed
+    }
+
+    return { sections: [...composed.sections, NUDGE] }
   })
 
   on('ui.render', { component: 'AbovePrompt' }, async ($, e, next) => {
@@ -318,7 +344,7 @@ export const register: Register = on => {
             <Text bold>Other agents</Text>
             {looseAgents.map(agent => (
               <Text color={agent.isStalled ? 'red' : undefined} dimColor={!agent.isStalled} wrap="truncate-end">
-                {agent.name}  {agent.isStalled ? 'stalled' : agent.status}, active {formatElapsed(now, agent.lastSeen)} ago
+                {agent.name}  {agent.isStalled ? 'stalled' : (AGENT_STATUS_LABELS[agent.status] ?? agent.status)}, active {formatElapsed(now, agent.lastSeen)} ago
               </Text>
             ))}
           </Box>
@@ -483,6 +509,21 @@ const stopLane = async ($: EngineInterface, laneName: string) => {
   }
 
   return `The user stopped agent ${lane.agent} on lane ${laneName}. Re-plan that lane.`
+}
+
+const closeLane = async ($: EngineInterface, laneName: string) => {
+  const current = await read($, own)
+  const isOwnLane = current?.lanes.some(lane => lane.lane === laneName) === true
+  if (current === null || !isOwnLane) {
+    return `No lane "${laneName}" in this session's report.`
+  }
+
+  const now = await $.clock.now()
+  const file: SessionFile = { ...current, updatedAt: now, lanes: current.lanes.filter(lane => lane.lane !== laneName) }
+  await saveSessionFile($, file, true)
+  await refreshView($, now)
+
+  return `The user closed lane ${laneName}. Leave it out of later reports.`
 }
 
 const statusLine = async ($: EngineInterface) => {
