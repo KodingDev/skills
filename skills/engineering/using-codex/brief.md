@@ -28,7 +28,7 @@ Numbered steps, in order.
 ## Tests
 
 - The tests to add or change, and the behaviour each one proves.
-- The commands to run, scoped to the changed code.
+- The commands to run, scoped to the changed code: the tests, plus the repo's lint and typecheck commands. Codex runs each one before it reports.
 
 ## Rules
 
