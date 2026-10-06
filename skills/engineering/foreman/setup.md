@@ -33,6 +33,8 @@ Location: `.foreman/PLAYBOOK.md`, untracked. Contents: variables only.
 ```
 # Playbook -- <program name>
 
+Program id: <one lower-case path segment, for example niagara-consolidation>
+
 ## Ground truth
 Spec documents and their authority order. What wins when spec and code disagree.
 

@@ -16,6 +16,21 @@ npx skills@latest add KodingDev/skills
 
 Pick the skills and the agents to install them on.
 
+## Mods
+
+Mods are Claude Code plugins that add live panes, status lines, and hooks to a session. This repo is a Claude Code marketplace, and each mod is its own plugin:
+
+```bash
+claude plugin marketplace add KodingDev/skills
+claude plugin install foreman@kodingdev
+```
+
+| Mod | What it does |
+| --- | --- |
+| [foreman](./mods/foreman) | `/lanes` shows the lanes of one program: what each agent says it is doing, its todos and resources, plus the memory, CPU, ports, and stalls the mod sees. |
+
+To work on a mod, add your clone as the marketplace: `claude plugin marketplace add <path to clone>`. Claude Code then reads the plugin from your clone, and `/reload-plugins` picks up edits.
+
 ## Skills
 
 Skills marked **`/name`** are user-invoked: they run only when you type the name. The agent reaches every other skill on its own when the task matches.
@@ -42,7 +57,7 @@ How the sessions run.
 | --- | --- |
 | [**`/pair`**](./skills/engineering/pair/SKILL.md) | Pair-programming mode. One move per turn, forks talked through before typing, and the keyboard back to you at each decision. |
 | [**`/red-team`**](./skills/engineering/red-team/SKILL.md) | A subagent argues against a point for two to four rounds. You get a verdict: what survived, what changed, what is still open. |
-| [**`/foreman`**](./skills/engineering/foreman/SKILL.md) | Delivery for big changes: tickets, a worktree per ticket, worker fan-out, and one reviewable PR per ticket per repo. |
+| [**`/foreman`**](./skills/engineering/foreman/SKILL.md) | Delivery for big changes: tickets, a worktree per ticket, worker fan-out, and one reviewable PR per ticket per repo. Pair it with the [foreman mod](#mods). |
 | [**`/rehab`**](./skills/engineering/rehab/SKILL.md) | Rehabilitates a sloppy AI-assisted codebase: fix the docs the agent reads, cut the rules file, and turn prose rules into checks. |
 | [orchestrate](./skills/engineering/orchestrate/SKILL.md) | Judgment for multi-agent work: separate builders from critics, cheap models compile and expensive models judge, tools shrink the corpus first. |
 | [using-codex](./skills/engineering/using-codex/SKILL.md) | Hands code and test writing to the Codex CLI in a worktree. A script records each round and catches commits that Codex makes. You brief, review every hunk, and commit. |
@@ -61,13 +76,14 @@ How the sessions run.
 | [linear-method](./skills/planning/linear-method/SKILL.md) | The [Linear Method](https://linear.app/method) as working rules: initiatives, enablers and blockers, 1-3 week projects, issues over user stories, cycles, launches. |
 | [**`/plan-project`**](./skills/planning/plan-project/SKILL.md) | Turns ideas and design docs into a review-ready backlog of vertical-slice tickets, sequenced by dependency, for Jira or Linear. |
 
-## Add a skill
+## Add a skill or a mod
 
-Put a folder under a bucket and write its `SKILL.md`. Then add it to this README, to the bucket README, and to `plugin.json`. [`CLAUDE.md`](./CLAUDE.md) holds the conventions.
+[`CLAUDE.md`](./CLAUDE.md) holds the conventions.
 
 ```
-skills/<bucket>/<skill>/SKILL.md   the skill, plus the files it reads
-.claude-plugin/plugin.json         the manifest that skills.sh installs from
+skills/<bucket>/<skill>/SKILL.md   a skill, plus the files it reads
+mods/<mod>/                        a Claude Code plugin of function hooks
+.claude-plugin/marketplace.json    the marketplace: one plugin per mod, plus "skills"
 ```
 
 MIT (c) Stella Inwood

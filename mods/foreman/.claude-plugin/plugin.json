@@ -1,0 +1,9 @@
+{
+  "name": "foreman",
+  "version": "0.1.0",
+  "description": "Live view of a foreman program: lanes, agents, stalls, what needs you, and memory",
+  "author": {
+    "name": "Stella Inwood"
+  },
+  "types": "./types/index.d.ts"
+}

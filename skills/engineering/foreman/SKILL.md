@@ -72,6 +72,28 @@ These hold for every program. The playbook never restates them; it only sets var
 
 - Never busy-wait; poll long runs in the background, and watch each to a terminal state.
 - When a lane closes, reap its agents, shells, and worktrees.
+- Name every worker after its lane (`Agent({ name })`). Report lanes by name and ticket
+  title, never by agent id.
+
+## Status report
+
+The user must see the program without asking. When the `mcp__foreman__report` tool
+exists, call it after every stage change, every PR, and every new decision that waits on
+the user. The lead sends the report for every lane. Workers report to the lead. Send only what
+changed. The tool's input schema describes each field.
+
+- `program`: the program id from the playbook. Every session on this program sends the
+  same id, so their lanes show together.
+- Each lane that changed, in full, with its worktree path. The path lets the user see
+  the memory, CPU, and ports of the lane.
+- For each lane, a short ETA such as `~40m`, a short summary, the plan as todos with a
+  rough ETA each, and the resources it owns with a label.
+- In `closed`, each lane that is done or whose worker ended.
+- In `needs`, only what waits on the user now. Send an empty list when nothing waits.
+
+The user reads it with `/lanes`. When the tool is absent, give the same picture in chat
+at each milestone. When the user stops a worker with `/lanes stop`, re-plan that lane. When the user
+closes a lane with `/lanes close`, leave it out of later reports.
 
 ## The loop (per ticket)
 
@@ -85,7 +107,9 @@ These hold for every program. The playbook never restates them; it only sets var
    merge order.
 5. **Self-review** before the PR: run the playbook's verification recipe and the
    baseline suites, check the brief's done-when list, read the diff as a cold reviewer.
-   Fix what you find. Never outsource a known defect to the user.
+   Compare every deleted or renamed path against the brief's FILES IN SCOPE; a deletion
+   outside that list is a defect. Fix what you find. Never outsource a known defect to
+   the user.
 6. **PR**: one per repo the ticket touches, conventions below, ticket linked. Move to In Review.
 7. **Feedback**: route each comment to a worker verbatim with file context; apply as
    fixup commits on the same PR; push; reply on the PR only to confirm what changed.
