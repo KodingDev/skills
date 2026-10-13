@@ -31,6 +31,8 @@ Most rules in this file follow from honest functions. Get these right first, and
 - A function works at one level of abstraction. A body that mixes orchestration with low-level detail splits, and each part gets a name that says what it does.
 - A section of a body that needs a heading is a function that wants out. Extract it, and its name replaces the comment.
 - Types make illegal states unrepresentable, so a reader does not need a comment to learn the rules.
+- A function takes three parameters or fewer. More become one options object.
+- A boolean parameter does not exist. Each behaviour is its own named function.
 
 ## Authority
 
@@ -58,6 +60,7 @@ Most rules in this file follow from honest functions. Get these right first, and
 - State the intended end state in one or two sentences before you write code. Build that state, as if the intended UX and architecture existed from day one.
 - Search for real callers before you keep anything for compatibility. A mode, prop, wrapper, route alias, or fallback with no caller is deleted.
 - One clear component or flow replaces mode flags. Split at a real boundary: state, layout, controls, or domain commands.
+- Order inside a file follows the language's convention, as its reference states.
 - Each shared rule lives in one place: feature flags, permissions, route gating, URL state, command naming, and every constant that more than one file uses.
 - Scope the rework to what makes the final shape coherent.
 - Name things for product intent. Implementation history stays in git.
@@ -95,6 +98,7 @@ Most rules in this file follow from honest functions. Get these right first, and
 
 - Prefer more lines and more named variables to a dense one-liner. An `await` gets its own variable before it enters a condition.
 - A complex condition becomes a named boolean.
+- A literal with meaning (a timeout, a limit, a status string) is a named constant. `0`, `1`, `""`, and an index stay inline.
 - A body splits into sections, with one blank line between sections.
 - A value is built field by field. One response is never spread into another to merge them.
 
@@ -199,6 +203,7 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Most wiring is covered by cross-module tests: several real modules composed through their public interfaces, with only external systems replaced.
 - Each critical user flow (sign in, checkout, publish) has one end-to-end test, on a short named list. A change that touches a listed flow updates its test.
 - A test name is a sentence about behaviour. A format-string name (`"%j -> %j"`) is for a pure input-to-output table, inside a suite named for the function under test.
+- A test's meaning goes in its name. A comment in a test only explains a fixture value that looks wrong.
 - A row's meaning goes in its test name. The runner does not print trailing comments.
 - A test lives where the language's test runner expects it, as the language reference states. Package code is tested in its package.
 - Suites stay flat.

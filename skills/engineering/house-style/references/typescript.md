@@ -50,6 +50,7 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 ## Values
 
 - A function that can find nothing returns `T | null`. `undefined` means "not provided": optional parameters and optional props (`?:`).
+- An optional chain is at most two links deep. A deeper `a?.b?.c?.d` means the type is wrong: fix the type.
 - A value that cannot be missing is used directly, without `|| undefined`, `?? ""`, or a polyfill for a platform API.
 - Time uses Temporal, with a polyfill until every target runtime ships it. The polyfill loads once, at the app entry.
 - Pick the Temporal type for the meaning: `Instant` for a moment, `PlainDate` for a calendar date, `ZonedDateTime` for a moment in a place. `Date` stays at the edges where a library requires it.
@@ -62,6 +63,7 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 
 ## Functions
 
+- A file puts its exports first and its private helpers below them.
 - Declare a function as an arrow: `export const name = () => {}`.
 - Return an expression directly: `=> Object.values(x)`.
 - Each way to call an operation is its own named function: `loadUserById`, `loadUserByEmail`. Overloads and mode options do not exist.
@@ -103,7 +105,7 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 - File suffixes: `.test.ts(x)` for tests, `.gen.ts` for generated code, `use-*.ts` for hooks.
 - A file with JSX is `.tsx`. A file without JSX is `.ts`.
 - A constant or type that belongs to one module stays in that module.
-- Import from the file that owns the symbol, through the package alias, without a `.js` extension. The one re-export file is the `index.ts` entry point at a package boundary. Inside a package, barrel files do not exist.
+- Import from the file that owns the symbol, through a Node subpath import (`#feature/x`, declared in `package.json` `imports`) across features and a relative path inside one feature, without a `.js` extension. `tsconfig` `paths` aliases do not exist. The one re-export file is the `index.ts` entry point at a package boundary. Inside a package, barrel files do not exist.
 - Type imports use the inline modifier: `import { a, type B } from "x"`.
 - Import named members: `import { filter, pipe } from "remeda"`.
 - Exports are named. A framework file that requires `export default` declares the component as a named `const` first.

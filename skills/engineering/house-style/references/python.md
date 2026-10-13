@@ -39,6 +39,7 @@ typeCheckingMode = "strict"
 ## Code
 
 - A project uses the `src/` layout (`src/<package>/`, with `tests/` beside `src/`), so tests import the installed package.
+- A module reads top to bottom as PEP 8 orders it: imports, constants, then definitions, with helpers before their callers.
 - Paths are `pathlib.Path`.
 - A module-level constant is SCREAMING_SNAKE. When it needs a description, a `#` comment goes on the line above it. A bare string literal after an assignment does not exist.
 

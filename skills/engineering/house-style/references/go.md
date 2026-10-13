@@ -18,6 +18,7 @@ Read this file with `SKILL.md` before you write or review Go.
 - A function that can block or do I/O takes `ctx context.Context` as its first parameter and passes it down to every call.
 - A goroutine has an owner that waits for it: an `errgroup.Group` or a `sync.WaitGroup`. A goroutine with no owner does not exist.
 - A resource is released with `defer` right after it is acquired.
+- A file orders its declarations as the Go standard library does: types and constructors first, then methods grouped by receiver, then helpers.
 - Zero values are useful. A constructor exists only when the zero value cannot be.
 
 ## Errors
