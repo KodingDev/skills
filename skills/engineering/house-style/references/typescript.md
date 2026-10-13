@@ -110,6 +110,7 @@ Read this file with `SKILL.md` before you write or review TypeScript or JavaScri
 
 ## Tests
 
+- A test file sits beside the code it tests.
 - Tests run on vitest. Every assertion sits inside an `it()` or `test()` block.
 - Async tests use `async`/`await`.
 - Committed tests run in full, without `.only` or `.skip`.

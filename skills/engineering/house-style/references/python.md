@@ -40,7 +40,13 @@ typeCheckingMode = "strict"
 
 - A project uses the `src/` layout (`src/<package>/`, with `tests/` beside `src/`), so tests import the installed package.
 - Paths are `pathlib.Path`.
-- A module-level constant is SCREAMING_SNAKE.
+- A module-level constant is SCREAMING_SNAKE. When it needs a description, a `#` comment goes on the line above it. A bare string literal after an assignment does not exist.
+
+  ```python
+  # Seconds before an idle upload is cancelled.
+  UPLOAD_TIMEOUT = 30
+  ```
+
 - Names are `snake_case` for functions, variables, and modules, and `PascalCase` for classes.
 - An interface is a `Protocol`, matched by structure.
 - Branching on a union uses `match`.
@@ -70,6 +76,7 @@ typeCheckingMode = "strict"
 
 ## Tests
 
+- Tests live in `tests/`, beside `src/`.
 - Tests run on pytest. A test is a plain function with plain `assert`.
 - A table of cases uses `pytest.mark.parametrize` with an `ids` list that names each row.
 - Shared setup is a fixture.

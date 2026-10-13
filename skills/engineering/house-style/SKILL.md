@@ -4,26 +4,33 @@ description: >
   The style for writing good code: the review bar that every change is
   written to and checked against, from the shape of a change down to names,
   comments, and commit messages. Use when writing, editing, or reviewing code,
-  when opening or updating a pull request, when doing UI work, or when the user
-  says "house style", "standards", "nitpicks", "behave", or "too many
-  comments".
+  when opening or updating a pull request, when fixing review comments, when
+  refactoring or cleaning up, when doing UI work, or when the user says "house
+  style", "standards", "nitpicks", "behave", or "too many comments".
 ---
 
 # House style
 
 The review bar for every change. Write to it, and before you open or update a pull request, check every changed hunk against every rule that applies to it.
 
-Three sibling skills carry the principles this file builds on. Apply them on every change:
+## Before you write or review
 
-- `golden` for the shape of what you build.
-- `canon` for how you study the system you change.
-- `function-design` for each function's dependencies, signature, and abstraction level.
+1. List the languages in the diff.
+2. Read the reference for each one, in full. Its rules are as binding as this file, and a review that skips it misses them.
+   - TypeScript and JavaScript: [`references/typescript.md`](references/typescript.md).
+   - React and UI code: [`references/react.md`](references/react.md), with the TypeScript file.
+   - Python: [`references/python.md`](references/python.md).
+   - Go: [`references/go.md`](references/go.md).
+3. Find the repo's lint, format, and typecheck commands, and run them on the change.
 
-Language rules live in references. Read the one for each language in the diff before you write or review it:
+## Honest functions
 
-- TypeScript and JavaScript: [`references/typescript.md`](references/typescript.md).
-- React and UI code: [`references/react.md`](references/react.md), with the TypeScript file.
-- Python: [`references/python.md`](references/python.md).
+Most rules in this file follow from honest functions. Get these right first, and many comments, names, and review notes become unnecessary.
+
+- A function's signature tells the whole truth: every input is a parameter, every outcome is in the return type. Hidden reads of globals, env, the clock, or I/O become parameters.
+- A function works at one level of abstraction. A body that mixes orchestration with low-level detail splits, and each part gets a name that says what it does.
+- A section of a body that needs a heading is a function that wants out. Extract it, and its name replaces the comment.
+- Types make illegal states unrepresentable, so a reader does not need a comment to learn the rules.
 
 ## Authority
 
@@ -39,6 +46,12 @@ Language rules live in references. Read the one for each language in the diff be
 - Before you design a format, a protocol, a schema, or a standard, search for the established ones that solve the same problem. Read their specs and their design rationale.
 - Name the prior art in the design: what it does, which principles carry over, and why you adopt it, adapt it, or build your own. Even when you build your own, the established standard's principles shape the decisions.
 - Before you add a rule, a helper, or a script, name the stock tool that already covers it. Write new code only for the gap that the tool leaves.
+
+## Lint first
+
+- A rule that a linter can check is enforced by the linter, not by review. Each language reference names its stock config.
+- When a repo has no lint, format, or typecheck step in CI, adding one is part of the change that needs it.
+- Review spends its attention on what no tool can check: shape, names, honesty, and fit with the code around it.
 
 ## Shape of a change
 
@@ -109,6 +122,7 @@ Language rules live in references. Read the one for each language in the diff be
 - Throw for bugs and broken invariants, with a custom error type and a descriptive message: `ConfigValidationError`.
 - An expected failure that the caller must handle (cancelled, not found, rate-limited) is a returned discriminated union, written by hand.
 - A `catch` does work: it recovers, translates, or adds context.
+- Fail loudly. When valid input makes a check fail, fix the check or the producer of the data. The consumer never catches the error to hide it.
 - A warning on a result is an error: throw, or return a typed failure.
 - Do the write and handle the conflict error. Check-then-act is a race.
 - Prefer an atomic operation to a toggle endpoint.
@@ -132,8 +146,8 @@ Code is traceable: from the logs alone, a reader can follow one request or job f
 
 ## Comments and docs
 
-- Comments are rare. A comment states a hidden constraint, an invariant, or a workaround, as the reason.
-- A comment describes the code as it is now. History stays in git.
+- A comment describes what the code does and why, as it is now. How the code came to be (the request, the bug that prompted it, the earlier version) stays in git.
+- A comment earns its place when the code alone does not tell a reviewer what happens: a hidden constraint, an invariant, a workaround, a technicality, or what a block of steps achieves together.
 - Removed code leaves no trace: no gravestone comment (`// removed X`, `// moved to Y`, `// legacy, kept for Z`) and no commented-out code.
 - A merged change has no TODOs.
 - A comment names no environment or session detail, such as a production URL or a local machine.
@@ -141,10 +155,16 @@ Code is traceable: from the logs alone, a reader can follow one request or job f
 - When you edit a file, bring the comments in the code you touch up to these rules: remove narration, banners, and change logs.
 - Reasoning that the user needs goes in the chat response.
 - A line comment lives inside a function body. A top-level declaration that needs a comment gets a doc comment.
-- A section inside a body can carry one line comment, multiline if needed, when its first line does not show its purpose. The comment gives the reason, never a heading that repeats the code.
-- Every export has a doc comment: one or two sentences on what it does and what the types cannot say.
+- A section inside a body can carry one short comment that describes what the section does, when its first line does not show it. Such a comment is also a sign that the section could be its own function.
+- Every export has a doc comment: one or two sentences on what it does and what the types cannot say. A doc comment uses the language's block form, multiline, as the reference shows.
 - A parameter tag carries a constraint that the type cannot express: units, ranges, "must be one path segment", "must be sorted". A tag that restates the name or the type is padding. The summary and the return type cover the return value.
 - Add an example when the call shape is not obvious. The example is a fenced code block with a language tag, and it compiles.
+
+Docs outside the code (READMEs, design docs, agent docs) exist to explain what is unclear and to cut discovery time. Every line they hold is one more thing that can disagree with the code.
+
+- A doc describes behaviour and intent. A directory pointer is fine ("routes live in `app/`"). Type, function, and file names stay in the code.
+- A doc holds no fact that the code or the environment already states and that drifts: counts ("three consumers"), versions ("npm 10.2"), lists of callers, option tables copied from source. A reader who needs the number counts it.
+- A doc covers what a reader cannot find by looking. When the code answers the question, the doc has nothing to add.
 
 ## Writing
 
@@ -164,6 +184,7 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - State what a thing is, as a constraint: "Must be one path segment."
 - Every word carries a fact. Cut filler: leverage, utilize, ensure, simply, just, robust, seamlessly, comprehensive, "in order to", "it is worth noting", "allows you to", "is designed to". Write "for example" and "that is", and name the items in place of "etc.".
 - Keep complete grammar, with articles and "that".
+- State what is true. Text never restates the request, who asked, or why the text was written.
 - Code, identifiers, paths, and quoted errors stay exact.
 - Everything that lands in the codebase is plain ASCII: `-` or `--` for dashes, straight quotes, `->` for arrows, regular spaces, and no emoji. Content that is meant to hold unicode, such as i18n strings and fixtures, keeps it.
 
@@ -179,7 +200,7 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Each critical user flow (sign in, checkout, publish) has one end-to-end test, on a short named list. A change that touches a listed flow updates its test.
 - A test name is a sentence about behaviour. A format-string name (`"%j -> %j"`) is for a pure input-to-output table, inside a suite named for the function under test.
 - A row's meaning goes in its test name. The runner does not print trailing comments.
-- A test lives where the language's test runner expects it: beside its code in TypeScript, in `tests/` in Python. Package code is tested in its package.
+- A test lives where the language's test runner expects it, as the language reference states. Package code is tested in its package.
 - Suites stay flat.
 
 ## Reuse before you write
@@ -220,6 +241,8 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - A branch name is a Conventional Commit type, a slash, and a kebab-case short name. With a Linear ticket, the id comes first: `feat/TEAM-123-linear-short-name`. Without one: `feat/short-name`.
 - One pull request per ticket. A fix found in review is a commit on the open pull request.
 - Every changed file in a pull request needed to change.
+- A commit holds only maintained files: code, tests, schemas, docs. Scratch output, captures, raw dumps, and temp or absolute local paths stay out.
+- Committed text names no private, local, or reverse-engineered source that it was derived from.
 
 ## Pull requests
 
