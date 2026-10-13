@@ -4,26 +4,36 @@ description: >
   The style for writing good code: the review bar that every change is
   written to and checked against, from the shape of a change down to names,
   comments, and commit messages. Use when writing, editing, or reviewing code,
-  when opening or updating a pull request, when doing UI work, or when the user
-  says "house style", "standards", "nitpicks", "behave", or "too many
-  comments".
+  when opening or updating a pull request, when fixing review comments, when
+  refactoring or cleaning up, when doing UI work, or when the user says "house
+  style", "standards", "nitpicks", "behave", or "too many comments".
 ---
 
 # House style
 
 The review bar for every change. Write to it, and before you open or update a pull request, check every changed hunk against every rule that applies to it.
 
-Three sibling skills carry the principles this file builds on. Apply them on every change:
+## Before you write or review
 
-- `golden` for the shape of what you build.
-- `canon` for how you study the system you change.
-- `function-design` for each function's dependencies, signature, and abstraction level.
+1. List the languages in the diff.
+2. Read the reference for each one, in full. Its rules are as binding as this file, and a review that skips it misses them.
+   - TypeScript and JavaScript: [`references/typescript.md`](references/typescript.md).
+   - React and UI code: [`references/react.md`](references/react.md), with the TypeScript file.
+   - Python: [`references/python.md`](references/python.md).
+   - Go: [`references/go.md`](references/go.md).
+3. Find the repo's lint, format, and typecheck commands, and run them on the change.
 
-Language rules live in references. Read the one for each language in the diff before you write or review it:
+## Honest functions
 
-- TypeScript and JavaScript: [`references/typescript.md`](references/typescript.md).
-- React and UI code: [`references/react.md`](references/react.md), with the TypeScript file.
-- Python: [`references/python.md`](references/python.md).
+Most rules in this file follow from honest functions. Get these right first, and many comments, names, and review notes become unnecessary.
+
+- A function's signature tells the whole truth: every input is a parameter, every outcome is in the return type. Hidden reads of globals, env, the clock, or I/O become parameters.
+- A function works at one level of abstraction. A body that mixes orchestration with low-level detail splits, and each part gets a name that says what it does.
+- Extract a function when its name tells a reader something the code does not, or when it has a second caller. A one-call helper with no clearer name stays inline, with a short comment if the section needs one.
+- Types make illegal states unrepresentable, so a reader does not need a comment to learn the rules.
+- A parameter takes the type that the callers already hold, not a custom shape or a container stricter than the body needs.
+- A function takes three parameters or fewer. More become one options object.
+- A boolean parameter does not exist. Each behaviour is its own named function.
 
 ## Authority
 
@@ -40,11 +50,18 @@ Language rules live in references. Read the one for each language in the diff be
 - Name the prior art in the design: what it does, which principles carry over, and why you adopt it, adapt it, or build your own. Even when you build your own, the established standard's principles shape the decisions.
 - Before you add a rule, a helper, or a script, name the stock tool that already covers it. Write new code only for the gap that the tool leaves.
 
+## Lint first
+
+- A rule that a linter can check is enforced by the linter, not by review. Each language reference names its stock config.
+- When a repo has no lint, format, or typecheck step in CI, adding one is part of the change that needs it.
+- Review spends its attention on what no tool can check: shape, names, honesty, and fit with the code around it.
+
 ## Shape of a change
 
 - State the intended end state in one or two sentences before you write code. Build that state, as if the intended UX and architecture existed from day one.
 - Search for real callers before you keep anything for compatibility. A mode, prop, wrapper, route alias, or fallback with no caller is deleted.
 - One clear component or flow replaces mode flags. Split at a real boundary: state, layout, controls, or domain commands.
+- Order inside a file follows the language's convention, as its reference states.
 - Each shared rule lives in one place: feature flags, permissions, route gating, URL state, command naming, and every constant that more than one file uses.
 - Scope the rework to what makes the final shape coherent.
 - Name things for product intent. Implementation history stays in git.
@@ -63,7 +80,8 @@ Language rules live in references. Read the one for each language in the diff be
 
 - Fix a wrong value at its producer: the pipeline, the API, the contract. A consumer shows what the source says, without case transforms, plain-text strippers, or replacement tables.
 - A consumer uses only data that its producer emits.
-- Domain terms stay as the source names them. When one looks wrong, a comment says that the source calls it this.
+- Domain terms stay as the source names them. When one looks wrong, a comment says that the source calls it this. A misspelling in the source stays only in the wire format, such as a JSON tag; the identifier uses correct English.
+- An API sends raw values, such as enum members. The consumer derives display labels.
 - Fetch in bulk, then look up. One call per entity is a loop of round trips.
 - A feature toggle or an env flag exists only while it has a reason to be off.
 
@@ -75,13 +93,15 @@ Language rules live in references. Read the one for each language in the diff be
 - A lookup is a map or a record. Related lookups share one object, keyed by one key.
 - Async work that a user can abandon (by navigating away, typing again, or closing a dialog) takes a cancellation signal and passes it down to every call it makes.
 - A pass-through (a wrapper that only forwards) is deleted, and its caller calls the real thing.
+- A variable that only renames or repacks a value already in scope is deleted. Use the value directly.
 - A repeated guard becomes one helper that checks and fails, such as `ensurePermissions`.
 - A framework response uses the framework helper: `forbidden()`, `notFound()`.
 
 ## Breathing room
 
-- Prefer more lines and more named variables to a dense one-liner. An `await` gets its own variable before it enters a condition.
+- Prefer more lines and more named variables to a dense one-liner, when each name adds meaning. An `await` gets its own variable before it enters a condition.
 - A complex condition becomes a named boolean.
+- A literal with meaning (a timeout, a limit, a status string) is a named constant. `0`, `1`, `""`, and an index stay inline.
 - A body splits into sections, with one blank line between sections.
 - A value is built field by field. One response is never spread into another to merge them.
 
@@ -90,10 +110,13 @@ Language rules live in references. Read the one for each language in the diff be
 - A boolean variable or predicate is a question: `isVisible`, `hasItems`, `canSubmit`. A boolean prop follows the platform: `open`, `disabled`, `checked`.
 - A count ends in `Count`: `savedCount`, `failedCount`.
 - Event props are `onX`. The function behind one is named for the action, such as `selectItem`.
+- A name is the plain domain noun, in full: `Camera`, `PostHog`, `GameDataApi`. No hedge or mode prefix (`Maybe`, `Show`) and no private abbreviation.
+- Generic code uses generic words. A domain word appears only in the module of the domain that owns it.
 - A file is named for what it holds: `retry-policy.ts`, `date-range.ts`. Generic buckets (`utils`, `helpers`, `constants`, `types`) do not exist.
 
 ## State
 
+- Runtime state lives in a store or a context, scoped to its instance. Mutable module-level state does not exist.
 - Values are immutable by default. Mutation applies only to values that the function created and that stay inside it, such as a local counter or a builder set. Arguments, module-level values, and anything the caller can see stay unchanged.
 - A class is for a stateful thing with a lifecycle: a cache, a player, a connection. It owns private state, invariants, and disposal. Stateless code is plain functions.
 
@@ -109,6 +132,7 @@ Language rules live in references. Read the one for each language in the diff be
 - Throw for bugs and broken invariants, with a custom error type and a descriptive message: `ConfigValidationError`.
 - An expected failure that the caller must handle (cancelled, not found, rate-limited) is a returned discriminated union, written by hand.
 - A `catch` does work: it recovers, translates, or adds context.
+- Fail loudly. When valid input makes a check fail, fix the check or the producer of the data. The consumer never catches the error to hide it.
 - A warning on a result is an error: throw, or return a typed failure.
 - Do the write and handle the conflict error. Check-then-act is a race.
 - Prefer an atomic operation to a toggle endpoint.
@@ -132,19 +156,28 @@ Code is traceable: from the logs alone, a reader can follow one request or job f
 
 ## Comments and docs
 
-- Comments are rare. A comment states a hidden constraint, an invariant, or a workaround, as the reason.
-- A comment describes the code as it is now. History stays in git.
+- A comment describes what the code does and why, as it is now. How the code came to be (the request, the bug that prompted it, the earlier version) stays in git.
+- A comment earns its place when the code alone does not tell a reviewer what happens: a hidden constraint, an invariant, a workaround, a technicality, or what a block of steps achieves together.
 - Removed code leaves no trace: no gravestone comment (`// removed X`, `// moved to Y`, `// legacy, kept for Z`) and no commented-out code.
 - A merged change has no TODOs.
+- Code carries no tracker ids, plan steps, milestone codes, or status notes. A ticket links to the code, never the reverse.
+- Emphasis is a plain sentence. A hard constraint uses `must`, not capitals or bold.
+- An example uses an obvious placeholder (`42`, `user@example.com`), never a real id.
 - A comment names no environment or session detail, such as a production URL or a local machine.
 - A cleanup keeps the useful comments that already exist: layout diagrams and real nuance.
 - When you edit a file, bring the comments in the code you touch up to these rules: remove narration, banners, and change logs.
 - Reasoning that the user needs goes in the chat response.
 - A line comment lives inside a function body. A top-level declaration that needs a comment gets a doc comment.
-- A section inside a body can carry one line comment, multiline if needed, when its first line does not show its purpose. The comment gives the reason, never a heading that repeats the code.
-- Every export has a doc comment: one or two sentences on what it does and what the types cannot say.
+- A section inside a body can carry one short comment that describes what the section does, when its first line does not show it. Such a comment is also a sign that the section could be its own function.
+- Every export has a doc comment: one or two sentences on what it does and what the types cannot say. A doc comment uses the language's block form, multiline, as the reference shows.
 - A parameter tag carries a constraint that the type cannot express: units, ranges, "must be one path segment", "must be sorted". A tag that restates the name or the type is padding. The summary and the return type cover the return value.
 - Add an example when the call shape is not obvious. The example is a fenced code block with a language tag, and it compiles.
+
+Docs outside the code (READMEs, design docs, agent docs) exist to explain what is unclear and to cut discovery time. Every line they hold is one more thing that can disagree with the code.
+
+- A doc describes behaviour and intent. A directory pointer is fine ("routes live in `app/`"). Type, function, and file names stay in the code.
+- A doc holds no fact that the code or the environment already states and that drifts: counts ("three consumers"), versions ("npm 10.2"), lists of callers, option tables copied from source. A reader who needs the number counts it.
+- A doc covers what a reader cannot find by looking. When the code answers the question, the doc has nothing to add.
 
 ## Writing
 
@@ -164,6 +197,7 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - State what a thing is, as a constraint: "Must be one path segment."
 - Every word carries a fact. Cut filler: leverage, utilize, ensure, simply, just, robust, seamlessly, comprehensive, "in order to", "it is worth noting", "allows you to", "is designed to". Write "for example" and "that is", and name the items in place of "etc.".
 - Keep complete grammar, with articles and "that".
+- State what is true. Text never restates the request, who asked, or why the text was written.
 - Code, identifiers, paths, and quoted errors stay exact.
 - Everything that lands in the codebase is plain ASCII: `-` or `--` for dashes, straight quotes, `->` for arrows, regular spaces, and no emoji. Content that is meant to hold unicode, such as i18n strings and fixtures, keeps it.
 
@@ -178,8 +212,9 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - Most wiring is covered by cross-module tests: several real modules composed through their public interfaces, with only external systems replaced.
 - Each critical user flow (sign in, checkout, publish) has one end-to-end test, on a short named list. A change that touches a listed flow updates its test.
 - A test name is a sentence about behaviour. A format-string name (`"%j -> %j"`) is for a pure input-to-output table, inside a suite named for the function under test.
+- A test's meaning goes in its name. A comment in a test only explains a fixture value that looks wrong.
 - A row's meaning goes in its test name. The runner does not print trailing comments.
-- A test lives where the language's test runner expects it: beside its code in TypeScript, in `tests/` in Python. Package code is tested in its package.
+- A test lives where the language's test runner expects it, as the language reference states. Package code is tested in its package.
 - Suites stay flat.
 
 ## Reuse before you write
@@ -220,6 +255,8 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - A branch name is a Conventional Commit type, a slash, and a kebab-case short name. With a Linear ticket, the id comes first: `feat/TEAM-123-linear-short-name`. Without one: `feat/short-name`.
 - One pull request per ticket. A fix found in review is a commit on the open pull request.
 - Every changed file in a pull request needed to change.
+- A commit holds only maintained files: code, tests, schemas, docs. Scratch output, captures, raw dumps, and temp or absolute local paths stay out.
+- Committed text names no private, local, or reverse-engineered source that it was derived from.
 
 ## Pull requests
 
