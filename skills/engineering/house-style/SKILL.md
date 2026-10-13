@@ -29,8 +29,9 @@ Most rules in this file follow from honest functions. Get these right first, and
 
 - A function's signature tells the whole truth: every input is a parameter, every outcome is in the return type. Hidden reads of globals, env, the clock, or I/O become parameters.
 - A function works at one level of abstraction. A body that mixes orchestration with low-level detail splits, and each part gets a name that says what it does.
-- A section of a body that needs a heading is a function that wants out. Extract it, and its name replaces the comment.
+- Extract a function when its name tells a reader something the code does not, or when it has a second caller. A one-call helper with no clearer name stays inline, with a short comment if the section needs one.
 - Types make illegal states unrepresentable, so a reader does not need a comment to learn the rules.
+- A parameter takes the type that the callers already hold, not a custom shape or a container stricter than the body needs.
 - A function takes three parameters or fewer. More become one options object.
 - A boolean parameter does not exist. Each behaviour is its own named function.
 
@@ -79,7 +80,8 @@ Most rules in this file follow from honest functions. Get these right first, and
 
 - Fix a wrong value at its producer: the pipeline, the API, the contract. A consumer shows what the source says, without case transforms, plain-text strippers, or replacement tables.
 - A consumer uses only data that its producer emits.
-- Domain terms stay as the source names them. When one looks wrong, a comment says that the source calls it this.
+- Domain terms stay as the source names them. When one looks wrong, a comment says that the source calls it this. A misspelling in the source stays only in the wire format, such as a JSON tag; the identifier uses correct English.
+- An API sends raw values, such as enum members. The consumer derives display labels.
 - Fetch in bulk, then look up. One call per entity is a loop of round trips.
 - A feature toggle or an env flag exists only while it has a reason to be off.
 
@@ -91,12 +93,13 @@ Most rules in this file follow from honest functions. Get these right first, and
 - A lookup is a map or a record. Related lookups share one object, keyed by one key.
 - Async work that a user can abandon (by navigating away, typing again, or closing a dialog) takes a cancellation signal and passes it down to every call it makes.
 - A pass-through (a wrapper that only forwards) is deleted, and its caller calls the real thing.
+- A variable that only renames or repacks a value already in scope is deleted. Use the value directly.
 - A repeated guard becomes one helper that checks and fails, such as `ensurePermissions`.
 - A framework response uses the framework helper: `forbidden()`, `notFound()`.
 
 ## Breathing room
 
-- Prefer more lines and more named variables to a dense one-liner. An `await` gets its own variable before it enters a condition.
+- Prefer more lines and more named variables to a dense one-liner, when each name adds meaning. An `await` gets its own variable before it enters a condition.
 - A complex condition becomes a named boolean.
 - A literal with meaning (a timeout, a limit, a status string) is a named constant. `0`, `1`, `""`, and an index stay inline.
 - A body splits into sections, with one blank line between sections.
@@ -107,10 +110,13 @@ Most rules in this file follow from honest functions. Get these right first, and
 - A boolean variable or predicate is a question: `isVisible`, `hasItems`, `canSubmit`. A boolean prop follows the platform: `open`, `disabled`, `checked`.
 - A count ends in `Count`: `savedCount`, `failedCount`.
 - Event props are `onX`. The function behind one is named for the action, such as `selectItem`.
+- A name is the plain domain noun, in full: `Camera`, `PostHog`, `GameDataApi`. No hedge or mode prefix (`Maybe`, `Show`) and no private abbreviation.
+- Generic code uses generic words. A domain word appears only in the module of the domain that owns it.
 - A file is named for what it holds: `retry-policy.ts`, `date-range.ts`. Generic buckets (`utils`, `helpers`, `constants`, `types`) do not exist.
 
 ## State
 
+- Runtime state lives in a store or a context, scoped to its instance. Mutable module-level state does not exist.
 - Values are immutable by default. Mutation applies only to values that the function created and that stay inside it, such as a local counter or a builder set. Arguments, module-level values, and anything the caller can see stay unchanged.
 - A class is for a stateful thing with a lifecycle: a cache, a player, a connection. It owns private state, invariants, and disposal. Stateless code is plain functions.
 
@@ -154,6 +160,9 @@ Code is traceable: from the logs alone, a reader can follow one request or job f
 - A comment earns its place when the code alone does not tell a reviewer what happens: a hidden constraint, an invariant, a workaround, a technicality, or what a block of steps achieves together.
 - Removed code leaves no trace: no gravestone comment (`// removed X`, `// moved to Y`, `// legacy, kept for Z`) and no commented-out code.
 - A merged change has no TODOs.
+- Code carries no tracker ids, plan steps, milestone codes, or status notes. A ticket links to the code, never the reverse.
+- Emphasis is a plain sentence. A hard constraint uses `must`, not capitals or bold.
+- An example uses an obvious placeholder (`42`, `user@example.com`), never a real id.
 - A comment names no environment or session detail, such as a production URL or a local machine.
 - A cleanup keeps the useful comments that already exist: layout diagrams and real nuance.
 - When you edit a file, bring the comments in the code you touch up to these rules: remove narration, banners, and change logs.

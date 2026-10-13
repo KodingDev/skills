@@ -6,7 +6,7 @@ Read this file with `SKILL.md` before you write or review Go.
 
 - The Go version is pinned in `mise.toml`, and `go.mod` declares the same `go` line.
 - gofmt and goimports format every file. Formatting is never a review note.
-- golangci-lint lints, with its config committed. A suppression is `//nolint:<linter> // <reason>`, and the reason is required.
+- golangci-lint lints, with its config committed and `errcheck` and `gocritic` on. A deliberately ignored error is discarded with `_ =`. A suppression is `//nolint:<linter> // <reason>`, and the reason is required.
 - `go vet` and `go test -race ./...` run in CI.
 
 ## Code

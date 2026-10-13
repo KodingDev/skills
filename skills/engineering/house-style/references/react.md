@@ -46,11 +46,15 @@ Read this file with `SKILL.md` and `typescript.md` before you write or review a 
 
 ## Design system
 
+- shadcn primitives live in `components/ui/`. Project components live in `components/<category>/`.
 - Build from the project's UI package and shadcn primitives, used as they are: `Button`, `Card`, `Table`, `Dialog` with `DialogHeader`, `ConfirmDialog`, `Carousel`. Trust the design system.
 - A new look is a CVA variant on the primitive.
 - Mobile first. Desktop layout uses `lg:` breakpoints.
 - Style with Tailwind utilities: `rotate-45`, `size-full`, `via-transparent`.
 - Every color, easing, surface, and type role comes from the design system's named tokens and utilities. A name missing from the design doc does not exist.
+- A design token is registered in `@theme`, so it compiles to a plain utility: `duration-fast`, not `duration-(--duration-fast)`.
+- A value known only at runtime goes through a CSS variable: `style={{ "--progress": value }}` with `className="w-(--progress)"`. Inline `style` sets only CSS variables.
+- A monochrome icon or logo is an inline SVG component that draws in `currentColor`. A CSS mask or a background image does not draw it.
 - Partial opacity (`/NN`) is for an element that is really transparent, such as a `bg-black/50 backdrop-blur-sm` overlay over page content. A softer color is a different token.
 - The error variant is named `error`.
 - `cn` joins classes under a condition.
