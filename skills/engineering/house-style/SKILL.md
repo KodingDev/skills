@@ -5,8 +5,9 @@ description: >
   written to and checked against, from the shape of a change down to names,
   comments, and commit messages. Use when writing, editing, or reviewing code,
   when opening or updating a pull request, when fixing review comments, when
-  refactoring or cleaning up, when doing UI work, or when the user says "house
-  style", "standards", "nitpicks", "behave", or "too many comments".
+  refactoring or cleaning up, when writing tests, when doing UI work, or when
+  the user says "house style", "standards", "nitpicks", "behave", "too many
+  comments", "tdd", or "test first".
 ---
 
 # House style
@@ -216,6 +217,15 @@ These rules apply to every comment, doc comment, error message, log line, pull r
 - A row's meaning goes in its test name. The runner does not print trailing comments.
 - A test lives where the language's test runner expects it, as the language reference states. Package code is tested in its package.
 - Suites stay flat.
+
+## Test first
+
+- A change that adds or fixes behaviour starts with a failing test, when a test seam for that behaviour exists.
+- Run the new test and see it fail for the expected reason before you write the code. A test that passes at once tests nothing new.
+- Work one behaviour at a time: one failing test, the least code that passes it, then a refactor while every test stays green.
+- Slice vertically. Each test drives one behaviour through the real interface, not one layer of many behaviours.
+- A bug fix starts with a test that reproduces the bug. That test stays as the regression test.
+- When no seam exists, say so, and verify through the highest real surface that does: a CLI, a request, or a screenshot.
 
 ## Reuse before you write
 
