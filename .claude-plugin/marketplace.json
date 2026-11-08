@@ -27,6 +27,7 @@
         "./engineering/red-team",
         "./engineering/rehab",
         "./engineering/using-codex",
+        "./engineering/using-omp",
         "./planning/linear-method",
         "./planning/plan-project"
       ]
