@@ -39,7 +39,7 @@ fi
 
 worktree="$(cd "$worktree" && pwd -P)"
 git_dir="$(git -C "$worktree" rev-parse --absolute-git-dir)" || die "not a git checkout: $worktree"
-common_dir="$(cd "$(git -C "$worktree" rev-parse --git-common-dir)" && pwd -P)"
+common_dir="$(cd "$worktree" && cd "$(git rev-parse --git-common-dir)" && pwd -P)"
 [ "$git_dir" != "$common_dir" ] || die "$worktree is the main checkout; run Codex in a linked worktree (git worktree add)"
 
 branch="$(git -C "$worktree" symbolic-ref --quiet --short HEAD)" || die "detached HEAD in $worktree; check out a feature branch"
